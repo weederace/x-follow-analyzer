@@ -820,7 +820,7 @@ For experienced users:
 برای کاربران حرفه‌ای:
 
 ```bash
-git https://github.com/weederace/x-follow-analyzer
+git clone https://github.com/weederace/x-follow-analyzer.git
 cd x-follow-analyzer
 pip install -r requirements.txt
 python x_follow_analyzer.py
