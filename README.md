@@ -1,217 +1,329 @@
 # 𝕏 Follow Analyzer — Pro Max UI 🚀
 
-**A powerful, secure, and completely offline desktop application for analyzing your X (formerly Twitter) account archive.**
+**A powerful, privacy-focused, and completely offline desktop application for analyzing your X (formerly Twitter) data archive.**
 
-**𝕏 Follow Analyzer** is a desktop application that analyzes your X data archive and shows you exactly which accounts you follow but who don't follow you back — without requiring access to your X account, API keys, passwords, cookies, or third-party services.
+**𝕏 Follow Analyzer** analyzes your official X data archive locally and shows you exactly which accounts you follow that **do not follow you back** — without requiring access to your X account, API keys, passwords, cookies, or third-party services.
 
-**𝕏 Follow Analyzer** یک برنامه دسکتاپ قدرتمند، امن و کاملاً آفلاین است که آرشیو اطلاعات حساب X شما را بررسی می‌کند و دقیقاً نشان می‌دهد چه افرادی را فالو کرده‌اید اما شما را فالو بک نکرده‌اند؛ بدون نیاز به دسترسی به حساب، API Key، رمز عبور، کوکی یا سرویس‌های شخص ثالث.
+**𝕏 Follow Analyzer** یک برنامه قدرتمند، امن و کاملاً آفلاین است که آرشیو رسمی اطلاعات حساب X شما را به‌صورت محلی بررسی می‌کند و دقیقاً نشان می‌دهد چه افرادی را فالو کرده‌اید اما شما را فالو بک نکرده‌اند؛ بدون نیاز به دسترسی مستقیم به حساب، API Key، رمز عبور، کوکی یا سرویس شخص ثالث.
 
 ---
 
 ![Python](https://img.shields.io/badge/Python-3.8%2B-blue.svg)
+![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688.svg)
+![Tailwind CSS](https://img.shields.io/badge/Frontend-Tailwind_CSS-38B2AC.svg)
+![Privacy](https://img.shields.io/badge/Privacy-100%25%20Offline-brightgreen.svg)
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
-![UI](https://img.shields.io/badge/UI-Tkinter-orange.svg)
-![Offline](https://img.shields.io/badge/Privacy-100%25%20Offline-brightgreen.svg)
 
 ---
 
-## 🌟 Features / امکانات
+## ✨ Overview / معرفی پروژه
 
-### 🔒 100% Offline & Secure / کاملاً آفلاین و امن
+### English
 
-**EN:**
-All archive processing happens locally on your computer. Your X data is never uploaded to a server.
+X provides users with an archive containing information from their account. This archive can contain follower and following data that can be used to analyze your social connections.
 
-**FA:**
-تمام پردازش آرشیو روی کامپیوتر خودتان انجام می‌شود و اطلاعات X شما به هیچ سروری ارسال نمی‌شود.
+𝕏 Follow Analyzer takes this archive, processes the relevant data locally, compares your followers with the accounts you follow, and generates an easy-to-use dashboard.
 
-* 🔒 No account login required / بدون نیاز به ورود به حساب
-* 🔑 No password required / بدون نیاز به رمز عبور
-* 🔐 No API key required / بدون نیاز به API Key
-* 🍪 No browser cookies required / بدون نیاز به کوکی مرورگر
-* 🌐 No third-party service / بدون سرویس شخص ثالث
-* ☁️ No cloud upload / بدون آپلود اطلاعات روی فضای ابری
+The application is designed around **privacy, simplicity, and speed**.
 
----
+You don't need to:
 
-### 🔍 Find Non-Followers / پیدا کردن فالو بک نداده‌ها
+* Log in to X through the application
+* Provide your X password
+* Provide API credentials
+* Export browser cookies
+* Connect your X account
+* Upload your archive to a remote server
 
-**EN:**
-The application compares your Followers and Following lists and automatically finds the accounts that you follow but that don't follow you back.
+Simply provide your downloaded X archive and let the application do the analysis locally.
 
-**FA:**
-برنامه لیست Followers و Following شما را با هم مقایسه می‌کند و به‌صورت خودکار افرادی را پیدا می‌کند که شما آن‌ها را فالو کرده‌اید اما آن‌ها شما را فالو بک نکرده‌اند.
+### فارسی
 
----
+X امکان دریافت آرشیو اطلاعات حساب را در اختیار کاربران قرار می‌دهد. این آرشیو می‌تواند شامل اطلاعات مربوط به Followers و Following باشد.
 
-### 🎨 Pro Max UI / رابط کاربری حرفه‌ای
+𝕏 Follow Analyzer فایل آرشیو را دریافت کرده، اطلاعات موردنیاز را به‌صورت محلی پردازش می‌کند، لیست Followers و Following را با یکدیگر مقایسه می‌کند و نتیجه را در قالب یک داشبورد حرفه‌ای نمایش می‌دهد.
 
-**EN:**
-A clean and modern desktop interface designed to make analyzing large lists easier.
+تمرکز اصلی پروژه روی **حریم خصوصی، سرعت و سادگی استفاده** است.
 
-**FA:**
-یک رابط کاربری مدرن و ساده که برای بررسی تعداد زیادی از اکانت‌ها طراحی شده است.
+برای استفاده از برنامه نیازی به موارد زیر ندارید:
 
-Features include / امکانات شامل:
+* ورود به حساب X داخل برنامه
+* رمز عبور X
+* API Key
+* Cookie مرورگر
+* اتصال مستقیم حساب X
+* آپلود آرشیو روی سرور خارجی
 
-* 🌙 Dark Mode / حالت تاریک
-* ☀️ Light Mode / حالت روشن
-* 📑 Tab-based interface / رابط کاربری تب‌بندی‌شده
-* 📊 Statistics / آمار
-* 🔎 Search and filtering / جستجو و فیلتر
-* ⚡ Fast profile opening / باز کردن سریع پروفایل‌ها
+فقط آرشیو دانلودشده از X را انتخاب کنید و تحلیل را به‌صورت محلی انجام دهید.
 
 ---
 
-### 🧠 Smart Processing History / تاریخچه هوشمند
+# 🌟 Features / امکانات
 
-**EN:**
-The application remembers the profiles you have already opened and processed.
+## 🔒 100% Offline & Privacy-Focused / کاملاً آفلاین و حریم‌خصوصی‌محور
 
-Once you open a profile:
+### English
 
-1. The profile is opened in your browser.
-2. The account is marked as processed.
-3. The account is removed from the pending list.
-4. The action is saved locally.
+Privacy is one of the main goals of this project.
 
-**FA:**
-برنامه پروفایل‌هایی را که قبلاً بررسی کرده‌اید به خاطر می‌سپارد.
+The archive is processed locally on your own computer through a local FastAPI server. The application does not require an external backend or cloud storage.
 
-بعد از باز کردن یک پروفایل:
+Your archive remains on your machine during the analysis process.
 
-1. پروفایل در مرورگر باز می‌شود.
-2. اکانت به‌عنوان «بررسی شده» علامت می‌خورد.
-3. اکانت از لیست افراد باقی‌مانده حذف می‌شود.
-4. وضعیت آن به‌صورت محلی ذخیره می‌شود.
+### فارسی
 
-این قابلیت باعث می‌شود یک اکانت را چند بار بررسی نکنید.
+حریم خصوصی یکی از اصلی‌ترین اهداف این پروژه است.
 
----
+آرشیو X روی کامپیوتر خودتان و توسط یک FastAPI server محلی پردازش می‌شود و برای تحلیل نیازی به سرور خارجی یا فضای ابری ندارید.
 
-### ⚡ Batch Open / باز کردن گروهی پروفایل‌ها
+اطلاعات آرشیو در طول فرآیند تحلیل از سیستم شما خارج نمی‌شود.
 
-**EN:**
-Open up to 10 profiles at once with a single click.
+### Privacy Features
 
-**FA:**
-با یک کلیک می‌توانید تا ۱۰ پروفایل را به‌صورت همزمان در مرورگر باز کنید.
+* 🔒 Local processing / پردازش کاملاً محلی
+* 🔑 No API Key / بدون API Key
+* 🔐 No password / بدون رمز عبور
+* 🍪 No browser cookies / بدون Cookie مرورگر
+* ☁️ No cloud upload / بدون آپلود ابری
+* 🌐 No third-party analysis service / بدون سرویس تحلیل شخص ثالث
+* 👤 No X account login / بدون ورود به حساب X
 
-این قابلیت مخصوصاً زمانی که تعداد فالو بک نداده‌ها زیاد باشد بسیار کاربردی است.
+> **Privacy Note:** The application itself is designed to process the archive locally. As with any local application, network activity may still depend on your operating system, browser, or other software running on your machine.
 
 ---
 
-### 📊 Excel Export / خروجی اکسل
+# 🎨 Pro Max UI / رابط کاربری حرفه‌ای
 
-**EN:**
-Export your results directly to an `.xlsx` file.
+The application includes a modern browser-based dashboard with a dark **Midnight Web3 / Glassmorphism** visual style.
 
-**FA:**
-می‌توانید لیست نتایج را مستقیماً به‌صورت فایل `.xlsx` خروجی بگیرید.
+برنامه دارای یک داشبورد مدرن و ریسپانسیو با طراحی **Midnight Web3 / Glassmorphism** است.
 
-فایل اکسل را می‌توانید با برنامه‌هایی مانند:
+### UI Highlights / امکانات رابط کاربری
 
-* Microsoft Excel
-* LibreOffice Calc
-* Google Sheets
-
-باز کنید.
-
----
-
-### 🆔 Automatic Account Detection / تشخیص خودکار حساب
-
-**EN:**
-The application automatically detects the account information available in your X archive.
-
-**FA:**
-برنامه اطلاعات مربوط به صاحب آرشیو را در صورت وجود، به‌صورت خودکار از فایل آرشیو استخراج می‌کند و نیازی به وارد کردن دستی اطلاعات حساب نیست.
+* 🌙 Modern dark interface
+* 🌍 English / فارسی bilingual interface
+* 📱 Responsive mobile-friendly layout
+* 🍔 Responsive drawer navigation
+* 📊 Interactive charts
+* ⚡ Fast profile actions
+* 🧊 Glassmorphism cards
+* 🎯 Clear account statistics
+* 🔄 Processed / Unprocessed workflow
 
 ---
 
-### 📈 Statistics / آمار
+# 📊 Advanced Analytics / تحلیل پیشرفته
 
-**EN:**
-The application provides useful statistics about your account archive.
+After analyzing your archive, the dashboard provides useful statistics about your account.
 
-**FA:**
-برنامه آمار کاربردی مربوط به آرشیو حساب شما را نمایش می‌دهد.
+پس از تحلیل آرشیو، داشبورد آمار مختلفی از وضعیت Followers و Following نمایش می‌دهد.
 
-Examples / نمونه:
+### Available Statistics
 
-* 👥 Total Followers / تعداد کل فالوورها
-* ➡️ Total Following / تعداد کل فالویینگ‌ها
-* ❌ Non-Followers / تعداد فالو بک نداده‌ها
-* ✅ Processed Profiles / تعداد پروفایل‌های بررسی‌شده
-* ⏳ Remaining Profiles / تعداد پروفایل‌های باقی‌مانده
+| Metric                        | Description                                           |
+| ----------------------------- | ----------------------------------------------------- |
+| 👥 Followers                  | تعداد افرادی که شما را دنبال می‌کنند                  |
+| ➡️ Following                  | تعداد افرادی که شما دنبال می‌کنید                     |
+| 🤝 Mutuals                    | تعداد دنبال‌کننده‌های دوطرفه                          |
+| ❌ Not Following Back          | افرادی که شما دنبال می‌کنید اما شما را دنبال نمی‌کنند |
+| 🎯 Follow-back Rate           | درصد افرادی که Follow Back کرده‌اند                   |
+| ⚖️ Follower / Following Ratio | نسبت Followers به Following                           |
 
 ---
 
-# ⚙️ Installation / نصب
+# 📈 Interactive Charts / نمودارهای تعاملی
 
-## 1. Install Python / نصب پایتون
+The dashboard visualizes your account data using interactive charts.
 
-**EN:**
-Make sure Python 3.8 or newer is installed on your computer.
+داشبورد اطلاعات حساب را به‌صورت نمودارهای تعاملی نمایش می‌دهد.
 
-**FA:**
-ابتدا مطمئن شوید Python نسخه 3.8 یا بالاتر روی سیستم شما نصب است.
+### Charts
 
-Download Python from the official website:
+* 🍩 **Connections Distribution**
 
-https://www.python.org/downloads/
+  * Followers
+  * Following
+  * Mutual Connections
+  * Not Following Back
 
-برای بررسی نصب بودن پایتون:
+* 📊 **Account Balance**
 
-```bash
-python --version
+  * Followers vs. Following
+
+* 🎯 **Follow-back Rate**
+
+  * Percentage of accounts following you back
+
+این نمودارها باعث می‌شوند وضعیت ارتباطات حساب بدون نیاز به بررسی دستی هزاران Username قابل مشاهده باشد.
+
+---
+
+# 🧠 Smart Processing History / تاریخچه هوشمند
+
+One of the main features of the application is its **Processed Profiles** system.
+
+برنامه پروفایل‌هایی را که قبلاً بررسی کرده‌اید با استفاده از `localStorage` مرورگر به خاطر می‌سپارد.
+
+When you open a profile:
+
+1. The X profile opens in a new browser tab.
+2. The username is marked as processed.
+3. The profile is moved to the **Processed** section.
+4. The status is saved locally in your browser.
+
+در نتیجه، اگر تعداد زیادی حساب برای بررسی داشته باشید، دیگر لازم نیست یک پروفایل را چند بار بررسی کنید.
+
+### Benefits / مزایا
+
+* ✅ Prevents duplicate checking
+* ✅ Keeps your workflow organized
+* ✅ Survives browser refreshes
+* ✅ Requires no database
+* ✅ Stored locally in the browser
+
+> Clearing your browser's site data or `localStorage` may remove the processed history.
+
+---
+
+# ⚡ Batch Profile Opening / باز کردن گروهی پروفایل‌ها
+
+The application allows you to open multiple profiles with a single action.
+
+می‌توانید چند پروفایل را به‌صورت گروهی در مرورگر باز کنید.
+
+این قابلیت برای زمانی که تعداد زیادی **Not Following Back** دارید بسیار کاربردی است.
+
+### Example
+
+Instead of opening profiles one by one:
+
+```text
+Profile 01 → Open
+Profile 02 → Open
+Profile 03 → Open
+Profile 04 → Open
+...
 ```
 
-یا:
+You can process multiple profiles together using the batch action.
 
-```bash
-python3 --version
+> The exact number of profiles opened at once may depend on browser settings and popup/tab restrictions.
+
+---
+
+# 🆔 Automatic Account Detection / تشخیص خودکار حساب
+
+The application attempts to detect the owner account information from the X archive automatically.
+
+برنامه اطلاعات مربوط به صاحب آرشیو را از فایل‌های موجود در آرشیو استخراج کرده و در داشبورد نمایش می‌دهد.
+
+This allows the interface to display the analyzed account without requiring manual username input.
+
+---
+
+# 🗂️ Archive Processing / پردازش آرشیو
+
+The application works with the official X account archive downloaded by the user.
+
+The archive is typically provided as a ZIP file.
+
+The application extracts and processes the relevant account data required for follower/following analysis.
+
+Depending on the archive format provided by X, relevant files may include files such as:
+
+```text
+account.js
+profile.js
+follower.js
+following.js
 ```
+
+> **Important:** X may change its archive structure or filenames over time. The application should therefore be considered dependent on the structure of the archive provided by X.
+
+### فارسی
+
+برنامه با آرشیو رسمی X که توسط کاربر دانلود شده کار می‌کند.
+
+این آرشیو معمولاً به‌صورت فایل ZIP ارائه می‌شود و برنامه اطلاعات موردنیاز برای تحلیل Followers و Following را از آن استخراج می‌کند.
+
+فایل‌های مورد استفاده ممکن است شامل موارد زیر باشند:
+
+```text
+account.js
+profile.js
+follower.js
+following.js
+```
+
+ساختار آرشیو X ممکن است در نسخه‌های مختلف تغییر کند.
+
+---
+
+# ⚙️ Requirements / پیش‌نیازها
+
+Before installing the project, make sure you have:
+
+قبل از نصب پروژه مطمئن شوید موارد زیر را دارید:
+
+* Python **3.8 or newer**
+* Git
+* A modern web browser
+* An X data archive in ZIP format
+
+Recommended browsers:
+
+* Google Chrome
+* Microsoft Edge
+* Mozilla Firefox
+* Brave
+
+---
+
+# 📦 Installation / نصب
+
+## 1. Install Python / نصب Python
+
+Install Python 3.8 or newer.
+
+Download Python from the official Python website.
+
+> On Windows, make sure **"Add Python to PATH"** is enabled during installation.
+
+بر روی ویندوز هنگام نصب Python گزینه **Add Python to PATH** را فعال کنید.
 
 ---
 
 ## 2. Clone the Repository / دریافت پروژه
 
-**EN:**
-
 Clone the repository using Git:
 
-**FA:**
-
-پروژه را با استفاده از Git دریافت کنید:
-
 ```bash
-git clone https://github.com/YOUR_USERNAME/x-follow-analyzer.git
+git clone https://github.com/weederace/x-follow-analyzer.git
 cd x-follow-analyzer
 ```
 
-> Replace `YOUR_USERNAME` with your GitHub username.
-
-> به‌جای `YOUR_USERNAME` نام کاربری GitHub خودتان را قرار دهید.
+یا در صورت استفاده از ZIP، پروژه را مستقیماً از GitHub دانلود و Extract کنید.
 
 ---
 
 ## 3. Install Dependencies / نصب پیش‌نیازها
 
-**EN:**
-Install the required Python packages using:
-
-**FA:**
-پیش‌نیازهای Python را با دستور زیر نصب کنید:
+Install the required Python packages:
 
 ```bash
-pip install -r requirements.txt
+pip install fastapi uvicorn python-multipart
 ```
 
-اگر `pip` کار نکرد، می‌توانید از این دستور استفاده کنید:
+اگر سیستم شما از چند نسخه Python استفاده می‌کند، می‌توانید از این دستور استفاده کنید:
 
 ```bash
-python -m pip install -r requirements.txt
+python -m pip install fastapi uvicorn python-multipart
+```
+
+در برخی سیستم‌ها ممکن است لازم باشد از `python3` استفاده کنید:
+
+```bash
+python3 -m pip install fastapi uvicorn python-multipart
 ```
 
 ---
@@ -220,562 +332,483 @@ python -m pip install -r requirements.txt
 
 ## English
 
-To use this application, you first need to request and download your X data archive.
+Before using the application, you need to request your X data archive.
+
+### Steps
 
 1. Open **X**.
 2. Go to **Settings and privacy**.
 3. Open **Your account**.
 4. Select **Download an archive of your data**.
 5. Verify your identity if requested.
-6. Submit your request.
-7. Wait for X to prepare your archive.
-8. Download the ZIP file once it is available.
+6. Submit the archive request.
+7. Wait until X prepares your archive.
+8. Download the ZIP file.
+9. Keep the ZIP file somewhere on your computer.
 
-The archive preparation process may take some time.
+### فارسی
 
----
+قبل از استفاده از برنامه باید آرشیو اطلاعات حساب X خود را دریافت کنید.
 
-## فارسی
-
-برای استفاده از این برنامه ابتدا باید آرشیو اطلاعات حساب X خود را دریافت کنید.
+### مراحل
 
 1. وارد **X** شوید.
-2. به بخش **Settings and privacy** بروید.
-3. وارد **Your account** شوید.
+2. وارد **Settings and privacy** شوید.
+3. بخش **Your account** را باز کنید.
 4. گزینه **Download an archive of your data** را انتخاب کنید.
 5. در صورت درخواست، هویت خود را تأیید کنید.
 6. درخواست دریافت آرشیو را ثبت کنید.
 7. منتظر آماده شدن آرشیو بمانید.
-8. پس از آماده شدن، فایل ZIP را دانلود کنید.
+8. فایل ZIP را دانلود کنید.
+9. فایل ZIP را روی کامپیوتر خود نگه دارید.
 
-> ممکن است آماده شدن آرشیو X مدتی زمان ببرد.
+> **Do not extract the ZIP manually unless the application specifically requires it.**
 
 ---
 
 # 🚀 Running the Application / اجرای برنامه
 
-**EN:**
-After installing the dependencies, run the application:
-
-**FA:**
-پس از نصب پیش‌نیازها، برنامه را با دستور زیر اجرا کنید:
+After installing the dependencies, start the local server:
 
 ```bash
-python x_follow_analyzer.py
+python x_analyzer_server.py
 ```
 
-یا:
+The application should start a local FastAPI server and make the dashboard available at:
 
-```bash
-python3 x_follow_analyzer.py
+```text
+http://127.0.0.1:8000
 ```
+
+در صورت پیاده‌سازی قابلیت باز شدن خودکار مرورگر، برنامه می‌تواند مرورگر پیش‌فرض سیستم را نیز به‌صورت خودکار باز کند.
+
+### Local Server
+
+```text
+Host: 127.0.0.1
+Port: 8000
+```
+
+> `127.0.0.1` means the service is bound to the local machine rather than being publicly hosted.
 
 ---
 
 # 📂 How to Use / نحوه استفاده
 
-## Step 1 — Select X Archive / انتخاب آرشیو
+## Step 1 — Select X Archive
 
-**EN:**
-Click the:
+Click:
+
+**📂 Select X Archive**
+
+and select the ZIP archive downloaded from X.
+
+### فارسی
+
+روی گزینه:
 
 **📂 انتخاب X Archive**
 
-button and select the ZIP file you downloaded from X.
-
-**FA:**
-روی دکمه:
-
-**📂 انتخاب X Archive**
-
-کلیک کنید و فایل ZIP دانلودشده از X را انتخاب کنید.
-
-برنامه فایل‌های مورد نیاز را از داخل آرشیو پیدا و پردازش می‌کند.
+کلیک کنید و فایل ZIP آرشیو X را انتخاب کنید.
 
 ---
 
-## Step 2 — Analyze Followers / تحلیل فالوورها
+## Step 2 — Analyze Your Account
 
-**EN:**
-The application compares:
+The application reads the required archive data and compares:
 
 ```text
-Following
-    ↓
 Followers
+      ↓
+Following
+      ↓
+Comparison
+      ↓
+Mutuals / Not Following Back
 ```
 
-and identifies accounts that don't follow you back.
+پس از پایان پردازش، نتایج و آمار در داشبورد نمایش داده می‌شوند.
 
-**FA:**
-برنامه لیست:
+---
+
+## Step 3 — Review Not Following Back
+
+Open the section containing accounts that don't follow you back.
+
+You can then inspect the usernames and open their X profiles directly.
+
+---
+
+## Step 4 — Process Profiles
+
+When you open a profile:
 
 ```text
-Following
-    ↓
-Followers
-```
-
-را با یکدیگر مقایسه کرده و افرادی را که شما را فالو بک نکرده‌اند مشخص می‌کند.
-
----
-
-## Step 3 — Open a Profile / باز کردن پروفایل
-
-**EN:**
-Double-click any username to open its X profile in your default browser.
-
-**FA:**
-روی هر یوزرنیم دابل‌کلیک کنید تا پروفایل آن شخص در مرورگر پیش‌فرض شما باز شود.
-
-بعد از باز شدن پروفایل، آن حساب به‌صورت خودکار به لیست بررسی‌شده‌ها منتقل می‌شود.
-
----
-
-## Step 4 — Batch Open / باز کردن ۱۰تایی
-
-**EN:**
-Use the batch-open button to open up to 10 profiles simultaneously.
-
-**FA:**
-با استفاده از گزینه باز کردن گروهی، می‌توانید تا ۱۰ پروفایل را همزمان در مرورگر باز کنید.
-
-پروفایل‌هایی که باز می‌شوند به‌صورت خودکار به‌عنوان بررسی‌شده ثبت می‌شوند.
-
----
-
-# 🧠 Processing History / تاریخچه بررسی
-
-**EN:**
-X Follow Analyzer includes a local history system that remembers which profiles you have already opened.
-
-**FA:**
-X Follow Analyzer دارای سیستم تاریخچه محلی است که پروفایل‌هایی را که قبلاً باز و بررسی کرده‌اید ذخیره می‌کند.
-
-### Workflow / روند کار
-
-```text
-Non-Followers
-      │
-      ▼
 Open Profile
-      │
-      ▼
+     ↓
 Mark as Processed
-      │
-      ▼
-Remove from Pending List
-      │
-      ▼
-Save Local History
+     ↓
+Move to Processed List
+     ↓
+Save locally
 ```
 
-```text
-فالو بک نداده‌ها
-      │
-      ▼
-باز کردن پروفایل
-      │
-      ▼
-علامت‌گذاری به‌عنوان بررسی‌شده
-      │
-      ▼
-حذف از لیست باقی‌مانده
-      │
-      ▼
-ذخیره در تاریخچه محلی
-```
+این سیستم کمک می‌کند وضعیت بررسی حساب‌ها را مدیریت کنید.
 
 ---
 
-# 📊 Excel Export / خروجی اکسل
+# 🔐 Privacy & Security / حریم خصوصی و امنیت
 
-**EN:**
-You can export the results to an `.xlsx` file for further analysis.
+## Local Processing / پردازش محلی
 
-**FA:**
-می‌توانید نتایج را به فایل `.xlsx` تبدیل کنید تا بعداً در Excel یا سایر نرم‌افزارهای Spreadsheet آن‌ها را بررسی کنید.
-
-Example / نمونه:
-
-```text
-username
-example_user_1
-example_user_2
-example_user_3
-```
-
----
-
-# 📁 X Archive Files / فایل‌های آرشیو مورد استفاده
-
-**EN:**
-The application reads the relevant follower/following information from your X archive.
-
-The main files used are:
-
-```text
-account.js
-follower.js
-following.js
-```
-
-**FA:**
-برنامه اطلاعات مورد نیاز برای تحلیل Followers و Following را از فایل‌های مربوطه در آرشیو X استخراج می‌کند.
-
-فایل‌های اصلی مورد استفاده عبارت‌اند از:
-
-```text
-account.js
-follower.js
-following.js
-```
-
----
-
-# 🛡️ Privacy & Security / حریم خصوصی و امنیت
-
-## 🔒 Local Processing / پردازش محلی
-
-**EN:**
 All archive analysis is performed locally on your computer.
 
-Your archive does not need to be uploaded anywhere.
+تمام تحلیل آرشیو روی کامپیوتر خودتان انجام می‌شود.
 
-**FA:**
-تمام تحلیل‌های مربوط به آرشیو روی کامپیوتر خودتان انجام می‌شود.
+The application does not require you to upload your archive to a remote analysis service.
 
-فایل آرشیو شما برای تحلیل نیازی به آپلود شدن در هیچ سایتی ندارد.
-
----
-
-## ❌ No Login Required / بدون نیاز به ورود
-
-The application does not require:
-
-برنامه به موارد زیر نیاز ندارد:
-
-* ❌ X Password / رمز عبور X
-* ❌ API Key
-* ❌ Browser Cookies / کوکی مرورگر
-* ❌ Authentication Tokens / توکن احراز هویت
-* ❌ Session Data / اطلاعات Session
-* ❌ Third-party Permissions / دسترسی سرویس‌های شخص ثالث
+برنامه برای تحلیل آرشیو نیازی به آپلود فایل شما روی یک سرویس تحلیل خارجی ندارد.
 
 ---
 
-## 🔐 Sensitive Data / اطلاعات حساس
+## No X Login / بدون ورود به X
 
-**EN:**
-The application is designed to use only the information required for follower/following analysis.
-
-It does not intentionally process:
-
-* Direct Messages (DMs)
-* Passwords
-* Authentication tokens
-* Browser cookies
-* Login credentials
-
-**FA:**
-برنامه فقط برای تحلیل Followers و Following از اطلاعات مورد نیاز استفاده می‌کند.
-
-موارد زیر به‌صورت عمدی توسط برنامه پردازش نمی‌شوند:
-
-* پیام‌های خصوصی (DM)
-* رمز عبور
-* توکن‌های احراز هویت
-* کوکی‌های مرورگر
-* اطلاعات ورود به حساب
-
-> **Security Note / نکته امنیتی:**
-> Always review and understand software before running it with personal data. Although this project is designed for local processing, you should only use software from sources you trust.
->
-> همیشه قبل از اجرای هر نرم‌افزاری روی اطلاعات شخصی خود، کد آن را بررسی کنید و تنها از نسخه‌هایی استفاده کنید که به آن‌ها اعتماد دارید.
-
----
-
-# 🌐 Internet Usage / نیاز به اینترنت
-
-**EN:**
-The archive analysis itself works offline.
-
-An internet connection is only required when you choose to open X profiles in your browser.
-
-**FA:**
-خود فرآیند تحلیل آرشیو کاملاً آفلاین انجام می‌شود.
-
-فقط زمانی که بخواهید پروفایل افراد را در مرورگر باز کنید به اینترنت نیاز دارید.
+The application does not need your X credentials.
 
 ```text
-Archive Analysis → Offline
-تحلیل آرشیو → آفلاین
-
-Profile Opening → Internet Required
-باز کردن پروفایل → نیازمند اینترنت
+❌ X Password
+❌ X API Key
+❌ Browser Cookies
+❌ Authentication Tokens
+❌ Login Session
 ```
 
 ---
 
-# 📂 Project Structure / ساختار پروژه
+## Sensitive Data / اطلاعات حساس
 
-A typical project structure:
+The application is focused on the follower/following information required for analysis.
 
-ساختار معمول پروژه:
+It does not intentionally require or request:
+
+* 🔑 X password
+* 🍪 Browser authentication cookies
+* 🔐 Authentication tokens
+* 💬 Direct Message access
+* 🔑 API credentials
+
+> The application only processes the data necessary for its functionality.
+
+---
+
+# 🛡️ Security Model / مدل امنیتی
+
+The application follows a simple architecture:
+
+```text
+┌───────────────────────────┐
+│       X Data Archive      │
+│          ZIP File         │
+└─────────────┬─────────────┘
+              │
+              ▼
+┌───────────────────────────┐
+│    Local Python Server    │
+│          FastAPI          │
+└─────────────┬─────────────┘
+              │
+              ▼
+┌───────────────────────────┐
+│       Data Analysis       │
+│ Followers vs Following    │
+└─────────────┬─────────────┘
+              │
+              ▼
+┌───────────────────────────┐
+│     Web Dashboard UI      │
+│    Charts + User Lists    │
+└───────────────────────────┘
+```
+
+No cloud database is required for the core analysis workflow.
+
+---
+
+# 📁 Project Structure / ساختار پروژه
+
+A typical project structure looks like:
 
 ```text
 x-follow-analyzer/
 │
-├── x_follow_analyzer.py
-├── requirements.txt
+├── x_analyzer_server.py
 ├── README.md
-├── LICENSE
-└── ...
+├── requirements.txt
+│
+├── static/
+│   ├── index.html
+│   ├── css/
+│   └── js/
+│
+└── assets/
+    └── ...
 ```
+
+> The exact structure may change between versions.
 
 ---
 
-# 🐍 Requirements / پیش‌نیازها
+# 🧩 Technology Stack / تکنولوژی‌های استفاده‌شده
 
-**EN:**
-
-* Python 3.8+
-* Tkinter
-* Packages listed in `requirements.txt`
-
-**FA:**
-
-* Python نسخه 3.8 یا بالاتر
-* Tkinter
-* پکیج‌های موجود در `requirements.txt`
-
-Install all dependencies with:
-
-```bash
-pip install -r requirements.txt
-```
+| Technology              | Purpose                   |
+| ----------------------- | ------------------------- |
+| 🐍 Python               | Core application logic    |
+| ⚡ FastAPI               | Local backend/server      |
+| 🚀 Uvicorn              | ASGI server               |
+| 🎨 Tailwind CSS         | UI styling                |
+| 📊 Chart.js             | Interactive charts        |
+| 🌐 HTML / JavaScript    | Dashboard interface       |
+| 💾 Browser localStorage | Processed profile history |
 
 ---
 
-# 🐞 Troubleshooting / رفع مشکلات
+# 🔄 How the Analysis Works / نحوه تحلیل
 
-## Python Not Found / پیدا نشدن Python
-
-If you see:
-
-اگر خطایی مانند زیر مشاهده کردید:
+The core concept is simple:
 
 ```text
-'python' is not recognized as an internal or external command
+Following
+    │
+    ├───────────────┐
+    │               │
+    ▼               ▼
+Followers        Not Followers
+    │               │
+    ▼               ▼
+Mutuals        Not Following Back
 ```
 
-Make sure Python is installed and added to your system PATH.
+More technically:
 
-مطمئن شوید Python نصب شده و به PATH سیستم اضافه شده است.
-
-On Windows, you can also try:
-
-در ویندوز می‌توانید این دستور را نیز امتحان کنید:
-
-```bash
-py x_follow_analyzer.py
+```text
+Not Following Back = Following − Followers
 ```
+
+And:
+
+```text
+Mutuals = Following ∩ Followers
+```
+
+این روش باعث می‌شود برنامه بتواند حساب‌هایی را که شما دنبال می‌کنید اما در لیست Followers شما وجود ندارند، شناسایی کند.
 
 ---
 
-## pip Not Found / پیدا نشدن pip
+# ⚡ Performance / عملکرد
+
+The application is designed to process the relevant archive data locally without requiring a remote API request for every username.
+
+This makes the analysis suitable for large follower/following lists while keeping the workflow simple.
+
+عملیات اصلی تحلیل به‌صورت محلی انجام می‌شود و برای بررسی هر Username نیازی به ارسال درخواست API به X وجود ندارد.
+
+---
+
+# 🐛 Troubleshooting / رفع مشکلات
+
+## `python` command not found
 
 Try:
 
 ```bash
-python -m pip install -r requirements.txt
+python3 --version
 ```
 
-یا در ویندوز:
+or on Windows:
 
 ```bash
-py -m pip install -r requirements.txt
+py --version
 ```
 
 ---
 
-## Tkinter Error / خطای Tkinter
+## `pip` command not found
 
-**EN:**
-This project uses Tkinter for its graphical interface.
-
-**FA:**
-این پروژه برای رابط گرافیکی خود از Tkinter استفاده می‌کند.
-
-On Debian/Ubuntu Linux:
-
-در Debian/Ubuntu می‌توانید از دستور زیر استفاده کنید:
+Try:
 
 ```bash
-sudo apt install python3-tk
+python -m pip --version
+```
+
+Then install dependencies using:
+
+```bash
+python -m pip install fastapi uvicorn python-multipart
 ```
 
 ---
 
-## Archive Cannot Be Read / آرشیو خوانده نمی‌شود
+## Port 8000 is already in use
 
-**EN:**
-Make sure you are selecting the original ZIP archive downloaded from X.
-
-**FA:**
-مطمئن شوید فایل ZIP اصلی دانلودشده از X را انتخاب کرده‌اید.
-
-همچنین بررسی کنید فایل‌های مورد نیاز مانند موارد زیر در آرشیو وجود داشته باشند:
-
-```text
-account.js
-follower.js
-following.js
-```
+If another application is using port `8000`, stop that application or configure the server to use another available port.
 
 ---
 
-## Missing Accounts / بعضی اکانت‌ها نمایش داده نمی‌شوند
+## Archive is not detected
 
-**EN:**
-X may change the structure of its data archives over time. If some accounts are missing, try requesting a new archive.
+Make sure:
 
-**FA:**
-ممکن است X در آینده ساختار فایل‌های آرشیو خود را تغییر دهد. اگر بعضی اکانت‌ها نمایش داده نمی‌شوند:
-
-1. یک آرشیو جدید از X درخواست کنید.
-2. مطمئن شوید آرشیو کامل دانلود شده است.
-3. وجود فایل‌های `follower.js` و `following.js` را بررسی کنید.
-4. در صورت ادامه مشکل، یک Issue در GitHub ایجاد کنید.
-
-> **Never upload your complete personal X archive to a public GitHub issue.**
->
-> **هرگز فایل کامل و شخصی آرشیو X خود را در یک Issue عمومی GitHub آپلود نکنید.**
+* The selected file is the original X archive.
+* The archive is a valid `.zip` file.
+* The archive has not been modified or corrupted.
+* The archive was generated by X.
+* The archive structure is supported by the current application version.
 
 ---
 
-# ⚠️ Limitations / محدودیت‌ها
+## Some users are missing
 
-**EN:**
-The application depends on the structure of the X data archive.
+X may change its archive format or the structure of follower/following files.
 
-If X changes its archive format, the application may require an update.
+If you encounter unexpected results, verify the archive structure and open an issue on GitHub with the relevant error information.
 
-**FA:**
-عملکرد برنامه به ساختار آرشیو اطلاعات X وابسته است.
-
-اگر X ساختار فایل‌های آرشیو خود را تغییر دهد، ممکن است برنامه نیاز به بروزرسانی داشته باشد.
-
-Possible changes include:
-
-* تغییر نام فایل‌ها
-* تغییر ساختار JSON/JavaScript
-* حذف برخی اطلاعات
-* تغییر نحوه ذخیره Followers و Following
-
----
-
-# 🚫 No Direct X API Access / بدون دسترسی مستقیم به API ایکس
-
-**EN:**
-This application does not query X's API to check followers in real time.
-
-It analyzes the data contained in the archive you provide.
-
-**FA:**
-این برنامه برای بررسی فالوورها از API ایکس استفاده نمی‌کند و اطلاعات را به‌صورت لحظه‌ای از سرورهای X دریافت نمی‌کند.
-
-برنامه فقط اطلاعات موجود در آرشیوی را که خودتان در اختیار آن قرار می‌دهید تحلیل می‌کند.
-
-بنابراین نتیجه بر اساس **زمان ایجاد آرشیو X** است.
-
----
-
-# 🔄 Updating Your Results / بروزرسانی نتایج
-
-**EN:**
-If you want the latest follower/following information, request a new archive from X and analyze the new ZIP file.
-
-**FA:**
-اگر می‌خواهید جدیدترین وضعیت Followers و Following را بررسی کنید، باید یک آرشیو جدید از X دریافت کرده و فایل ZIP جدید را در برنامه وارد کنید.
-
-برنامه به‌صورت خودکار حساب X شما را مانیتور نمی‌کند.
+**Never upload or publish your private X archive publicly.**
 
 ---
 
 # 🤝 Contributing / مشارکت در پروژه
 
-**EN:**
-Contributions are welcome!
+Contributions are welcome! 🎉
 
-**FA:**
-از مشارکت شما در توسعه پروژه استقبال می‌کنیم!
+از Pull Request، Bug Report و Feature Request استقبال می‌کنیم.
 
-برای مشارکت:
+### Contribution Workflow
 
-1. پروژه را Fork کنید.
-2. یک Branch جدید بسازید.
-3. تغییرات خود را اعمال کنید.
-4. پروژه را تست کنید.
-5. تغییرات را Commit کنید.
-6. یک Pull Request ارسال کنید.
+1. Fork the project.
+2. Create a feature branch.
+3. Make your changes.
+4. Test the application locally.
+5. Commit your changes.
+6. Push your branch.
+7. Open a Pull Request.
 
-Example / نمونه:
+Example:
 
 ```bash
-git checkout -b feature/my-new-feature
-
+git checkout -b feature/AmazingFeature
 git add .
-
-git commit -m "Add my new feature"
-
-git push origin feature/my-new-feature
+git commit -m "Add AmazingFeature"
+git push origin feature/AmazingFeature
 ```
 
-سپس در GitHub یک **Pull Request** ایجاد کنید.
+Then open a Pull Request on GitHub.
+
+---
+
+# 🐞 Bug Reports / گزارش باگ
+
+If you find a bug, please provide:
+
+* Operating system
+* Python version
+* Application version/commit
+* Error message
+* Steps to reproduce the issue
+* Relevant screenshots if applicable
+
+### ⚠️ Privacy Warning
+
+**Never upload your complete X archive to a public GitHub issue.**
+
+Your archive may contain private and sensitive information.
 
 ---
 
 # 💡 Future Plans / برنامه‌های آینده
 
-Possible future features:
+The following features are planned or may be considered for future versions:
 
-امکانات احتمالی نسخه‌های آینده:
+* [ ] 📊 Export results to Excel (`.xlsx`)
+* [ ] 📄 Export results to CSV
+* [ ] 🔎 Advanced username search
+* [ ] 🏷️ User filtering and categorization
+* [ ] 📈 More advanced analytics
+* [ ] 🔄 Archive comparison / Time Machine
+* [ ] 📅 Historical follower analysis
+* [ ] 🧹 Improved profile management workflow
+* [ ] 🌍 Improved multilingual support
+* [ ] 🎨 Additional UI themes
+* [ ] ⚙️ Configurable batch size
+* [ ] 📱 Improved mobile interface
+* [ ] 📦 Standalone executable builds
+* [ ] 📝 Detailed analysis reports
 
-* 🔎 Advanced username search / جستجوی پیشرفته یوزرنیم
-* 🏷️ Custom labels / برچسب‌گذاری اکانت‌ها
-* 📅 Follow history / تاریخچه فالو
-* 📈 Historical statistics / آمار تاریخی
-* 🔄 Archive comparison / مقایسه چند آرشیو
-* 📊 Advanced analytics / تحلیل‌های پیشرفته
-* 🧹 Advanced filtering / فیلترهای پیشرفته
-* 📋 Copy usernames / کپی یوزرنیم‌ها
-* 🌍 Full multilingual UI / رابط کاربری چندزبانه
-* ⚙️ More customization / شخصی‌سازی بیشتر
-* 🖥️ Standalone executable / نسخه مستقل اجرایی
-* 📦 Windows `.exe` release / نسخه قابل اجرای ویندوز
+> Automatic unfollow functionality should be implemented carefully and may require browser automation or official X functionality.
+
+---
+
+# 🗺️ Roadmap / نقشه راه
+
+### Phase 1 — Core Analyzer
+
+* [x] X archive loading
+* [x] Followers extraction
+* [x] Following extraction
+* [x] Follow-back analysis
+* [x] Local processing
+* [x] Web dashboard
+
+### Phase 2 — UI & Workflow
+
+* [x] Modern UI
+* [x] Responsive layout
+* [x] Profile opening
+* [x] Processed profile tracking
+* [x] Interactive charts
+* [x] Bilingual interface
+
+### Phase 3 — Analytics
+
+* [ ] Advanced filtering
+* [ ] Search
+* [ ] Archive comparison
+* [ ] Historical statistics
+* [ ] Export system
+
+### Phase 4 — Distribution
+
+* [ ] Windows executable
+* [ ] Portable version
+* [ ] Improved installation experience
+* [ ] Automated dependency management
 
 ---
 
 # ⚖️ Disclaimer / سلب مسئولیت
 
-**EN:**
-This project is an independent, unofficial tool and is not affiliated with, endorsed by, or sponsored by X Corp. or Twitter.
+### English
+
+𝕏 Follow Analyzer is an independent, unofficial open-source project.
+
+This project is **not affiliated with, endorsed by, sponsored by, or officially connected to X Corp., Twitter, or any of their subsidiaries or affiliates.
 
 X and Twitter are trademarks of their respective owners.
 
-This application is intended to process data that you have legitimately downloaded from your own X account.
+The application is intended for analyzing data that has been legitimately downloaded by the account owner.
 
-You are responsible for complying with X's Terms of Service and all applicable laws.
+Users are responsible for complying with the applicable laws, regulations, and X Terms of Service when using this software.
 
-**FA:**
-این پروژه یک ابزار مستقل و غیررسمی است و هیچ ارتباط، تأیید یا حمایت رسمی از طرف X Corp. یا Twitter ندارد.
+### فارسی
 
-نام‌های X و Twitter متعلق به صاحبان مربوطه هستند.
+𝕏 Follow Analyzer یک پروژه مستقل و غیررسمی است.
 
-این برنامه برای پردازش اطلاعاتی طراحی شده است که شما به‌صورت قانونی از حساب X خود دریافت کرده‌اید.
+این پروژه هیچ‌گونه ارتباط، تأیید، حمایت مالی یا وابستگی رسمی به **X Corp.، Twitter** یا شرکت‌های وابسته به آن‌ها ندارد.
 
-مسئولیت رعایت قوانین، شرایط استفاده X و قوانین مربوطه بر عهده کاربر است.
+نام‌ها و علائم تجاری X و Twitter متعلق به صاحبان مربوطه هستند.
+
+این برنامه برای تحلیل اطلاعاتی طراحی شده است که کاربر به‌صورت قانونی از حساب خود دریافت کرده است.
+
+مسئولیت استفاده از این نرم‌افزار و رعایت قوانین و شرایط استفاده از X بر عهده کاربر است.
 
 ---
 
@@ -785,55 +818,55 @@ This project is licensed under the **MIT License**.
 
 این پروژه تحت مجوز **MIT License** منتشر شده است.
 
-برای اطلاعات کامل به فایل زیر مراجعه کنید:
+You are free to:
 
-```text
-LICENSE
-```
+* Use the software
+* Modify the source code
+* Distribute copies
+* Use it commercially
 
----
-
-# ⭐ Support the Project / حمایت از پروژه
-
-**EN:**
-If you find this project useful, consider supporting it by:
-
-**FA:**
-اگر این پروژه برای شما مفید بود، می‌توانید با روش‌های زیر از پروژه حمایت کنید:
-
-⭐ Star the repository / ستاره دادن به پروژه
-
-🐛 Report bugs / گزارش باگ
-
-💡 Suggest features / پیشنهاد قابلیت جدید
-
-🔧 Submit Pull Requests / ارسال Pull Request
-
-📢 Share the project / معرفی پروژه به دیگران
+Subject to the conditions of the MIT License.
 
 ---
 
-# 🚀 Quick Start / شروع سریع
+# ❤️ Built for Privacy & the Web3 Community
 
-For experienced users:
+Built with:
 
-برای کاربران حرفه‌ای:
+**Python 🐍 · FastAPI ⚡ · Tailwind CSS 🎨 · Chart.js 📊 · Privacy 🔒**
 
-```bash
-git clone https://github.com/weederace/x-follow-analyzer.git
-cd x-follow-analyzer
-pip install -r requirements.txt
-python x_follow_analyzer.py
-```
+ساخته‌شده با:
 
-Then select your X archive ZIP file.
-
-سپس فایل ZIP آرشیو X خود را انتخاب کنید.
+**Python 🐍 · FastAPI ⚡ · Tailwind CSS 🎨 · Chart.js 📊 · حفظ حریم خصوصی 🔒**
 
 ---
 
-## ❤️ Made with Python
+## ⭐ Support the Project
 
-**Made with Python 🐍 · Tkinter 🎨 · Privacy 🔒 · Open Source 🌐**
+If you find **𝕏 Follow Analyzer** useful:
 
-**ساخته‌شده با Python 🐍 · Tkinter 🎨 · حفظ حریم خصوصی 🔒 · متن‌باز 🌐**
+* ⭐ Star the repository
+* 🐛 Report bugs
+* 💡 Suggest features
+* 🔧 Submit Pull Requests
+* 📢 Share the project with others
+
+Your support helps the project grow.
+
+---
+
+## 👨‍💻 Author
+
+**weederace**
+
+Built with ❤️ for people who want to analyze their X connections without giving their account credentials to third-party services.
+
+---
+
+# 🔗 Project
+
+**𝕏 Follow Analyzer — Pro Max UI**
+
+A privacy-focused, local-first X archive analyzer built with Python and FastAPI.
+
+**Analyze locally. Stay private. Know who follows you back. 🔒**
