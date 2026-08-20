@@ -10,8 +10,9 @@ echo.
 echo   1  Web dashboard   (opens in your browser)
 echo   2  Desktop app     (its own window, no browser)
 echo   3  Run the tests
+echo   4  Build the Android APK   (first time takes a while)
 echo.
-set /p choice="Choose 1, 2 or 3 [1]: "
+set /p choice="Choose 1, 2, 3 or 4 [1]: "
 if "%choice%"=="" set choice=1
 
 rem  py is the Windows launcher and is what a python.org install provides; plain
@@ -20,6 +21,7 @@ rem  we do not land on the Store stub that only opens a download page.
 where py >nul 2>nul && (set PY=py) || (set PY=python)
 
 if "%choice%"=="3" goto tests
+if "%choice%"=="4" goto apk
 
 echo.
 echo Installing what is missing (nothing happens if it is already there)...
@@ -40,6 +42,13 @@ goto done
 :tests
 echo.
 %PY% tests\run_all.py
+goto done
+
+:apk
+rem  -ExecutionPolicy Bypass applies to this one process only and changes nothing on the
+rem  machine: the default policy blocks unsigned local scripts, and this is one.
+echo.
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0build-apk.ps1"
 
 :done
 echo.

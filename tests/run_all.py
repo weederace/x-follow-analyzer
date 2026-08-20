@@ -1,13 +1,14 @@
 """
 run_all.py — every suite, one command:  python tests/run_all.py
 
-There are five, in two languages, because the project has two of everything: a Python
+There are six, in two languages, because the project has two of everything: a Python
 reader and a JavaScript reader that must agree, a Python desktop app and a JavaScript
 web app that must share one history file.
 
     test_parser.py     the Python archive reader, and the bug that started this
     test_server.py     the loopback API and its Origin/Host guard
     test_desktop.py    the Tkinter triage desk, driven through a fake Tk
+    test_android.py    the APK's icons and launch screen, without an Android SDK
     test_analyzer.mjs  the in-page reader, checked line by line against Python
     test_frontend.mjs  the web app, driven through a fake DOM
 
@@ -24,7 +25,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 
-PY_SUITES = ["test_parser.py", "test_server.py", "test_desktop.py"]
+PY_SUITES = ["test_parser.py", "test_server.py", "test_desktop.py", "test_android.py"]
 JS_SUITES = ["test_analyzer.mjs", "test_frontend.mjs"]
 
 

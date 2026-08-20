@@ -25,11 +25,15 @@
 
   "plugins": {
     "CapacitorHttp": { "enabled": false },
-    "SplashScreen": {
-      "launchAutoHide": true,
-      "launchShowDuration": 300,
-      "backgroundColor": "#BAC5BF",
-      "androidScaleType": "CENTER_CROP"
-    }
+
+    "//SplashScreen": [
+      "There is deliberately no SplashScreen block here. @capacitor/splash-screen is not a",
+      "dependency of this project, so its options would be read by nobody — a config that",
+      "looks like it controls something and does not is worse than no config at all.",
+      "",
+      "The launch screen comes from the Android theme instead: AppTheme.NoActionBarLaunch",
+      "draws android-res/drawable/splash.xml, which is the desk colour with the app's own",
+      "mark centred on it, and it goes away the moment the WebView paints the same colour."
+    ]
   }
 }

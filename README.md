@@ -35,7 +35,7 @@
 
 یک برنامه است با سه پوسته: مرورگر، پنجرهٔ دسکتاپ، و اپ اندروید.
 
-روی ویندوز ساده‌ترین راه `Run.bat` است: منویی می‌آید و بین نسخهٔ وب، نسخهٔ دسکتاپ و اجرای تست‌ها انتخاب می‌کنی.
+روی ویندوز ساده‌ترین راه `Run.bat` است: منویی می‌آید و بین نسخهٔ وب، نسخهٔ دسکتاپ، اجرای تست‌ها و ساختن APK اندروید انتخاب می‌کنی.
 
 **نسخهٔ وب** یک سرور کوچک روی `127.0.0.1:8000` بالا می‌آورد و مرورگر را باز می‌کند:
 
@@ -52,7 +52,13 @@ python x_follow_analyzer.py
 
 نسخهٔ دسکتاپ یک دکمهٔ **خروجی اکسل** هم دارد که فهرست را با یوزرنیم، آیدی و لینک در یک فایل `.xlsx` می‌ریزد. تنها جایی از برنامه است که به `openpyxl` نیاز دارد، و اگر نصب نباشد برنامه crash نمی‌کند؛ همان دستور نصب را نشانت می‌دهد.
 
-**نسخهٔ اندروید** یک APK واقعی است که خودت یک‌بار می‌سازی. مراحلش کامل در [ANDROID.md](ANDROID.md) نوشته شده.
+**نسخهٔ اندروید** یک APK واقعی است که خودت یک‌بار می‌سازی. روی ویندوز یک دستور است:
+
+```bat
+powershell -ExecutionPolicy Bypass -File build-apk.ps1
+```
+
+خودش JDK را پیدا می‌کند، Android SDK را پیدا یا (با اجازه‌ات) نصب می‌کند، build می‌گیرد و فایل را در `dist\follow-desk-debug.apk` می‌گذارد. جزئیات و مسیر دستی در [ANDROID.md](ANDROID.md) است.
 
 ---
 
@@ -122,11 +128,21 @@ web/history.js          پل تاریخچه: API سرور، یا حافظهٔ د
 web/icon.svg            آیکون برنامه و اپ اندروید
 web/manifest.webmanifest  تا نصب روی گوشی و دسکتاپ ممکن باشد
 
-tests/run_all.py        همهٔ تست‌ها با یک دستور
+build-apk.ps1           از clone تا APK نصب‌شدنی، با یک دستور
+android-res/            آیکون لانچر و صفحهٔ شروع — تنها چیزی در android/ که مال ماست
+tools/                  ساخت آیکون‌ها از icon.svg و کپی‌شان در پروژهٔ تولیدشده
 package.json            اسکریپت‌های ساخت APK و اجرای تست‌های جاوااسکریپت
 capacitor.config.json   تنظیمات بستهٔ اندروید — web/ را مستقیم داخل APK می‌گذارد
 ANDROID.md              ساخت APK با Capacitor
+LICENSE                 MIT
+
+tests/run_all.py        همهٔ تست‌ها با یک دستور
 ```
+
+`android/` در `.gitignore` است چون ۲۰۰ مگابایت خروجی Gradle است و با یک دستور
+دوباره ساخته می‌شود. ولی `android-res/` نه: هر بار که آن پوشه از نو ساخته شود،
+آیکون‌ها باید دوباره سر جایشان بروند، و اگر پیگیری نشوند کسی که پروژه را clone
+می‌کند اپ را با لوگوی پیش‌فرض Capacitor می‌سازد.
 
 هیچ CDN، هیچ فریم‌ورک، هیچ مرحلهٔ build. `web/` همان چیزی است که مرورگر می‌بیند، پس چیزی نیست که از کد اصلی عقب بماند.
 
@@ -138,11 +154,13 @@ ANDROID.md              ساخت APK با Capacitor
 python tests/run_all.py
 ```
 
-پنج مجموعه، بیش از ۲۷۰ بررسی. مهم‌ترینشان `test_analyzer.mjs` است: یک آرشیو می‌سازد و همان بایت‌ها را به هر دو خوانندهٔ پایتونی و جاوااسکریپتی می‌دهد و خروجی‌ها را مقایسه می‌کند، چون دو پیاده‌سازی از یک الگوریتم بی‌صدا از هم دور می‌شوند.
+شش مجموعه، بیش از ۳۴۰ بررسی. مهم‌ترینشان `test_analyzer.mjs` است: یک آرشیو می‌سازد و همان بایت‌ها را به هر دو خوانندهٔ پایتونی و جاوااسکریپتی می‌دهد و خروجی‌ها را مقایسه می‌کند، چون دو پیاده‌سازی از یک الگوریتم بی‌صدا از هم دور می‌شوند.
 
 نسخهٔ دسکتاپ با یک tkinter تقلبی (`tests/faketk.py`) و نسخهٔ وب با یک DOM تقلبی (`tests/minidom.mjs`) اجرا می‌شوند — هیچ‌کدام Mock نیستند، بلکه پیاده‌سازی واقعی همان بخش کوچکی هستند که برنامه استفاده می‌کند. تفاوتش این است که Mock به هر اسم غلطی جواب می‌دهد، اینها نه. تست‌ها هرگز به تاریخچهٔ واقعی دست نمی‌زنند؛ `tests/sandbox.py` مسیر ذخیره‌سازی را به یک پوشهٔ موقت می‌برد.
 
-اگر Node نصب نباشد، سه مجموعهٔ پایتونی اجرا می‌شوند و در خلاصه صریح نوشته می‌شود که دو تای دیگر اجرا نشده‌اند — نه اینکه کار نیمه‌تمام موفق گزارش شود. برای اجرای فقط بخش جاوااسکریپت: `npm test`.
+`test_android.py` بدون Android SDK اجرا می‌شود و به‌جای build گرفتن، منابع اپ را بررسی می‌کند: پانزده فایل PNG با اندازهٔ درست در پنج تراکم (با یک خوانندهٔ PNG کوچک از `zlib`، تا هیچ وابستگی اضافه لازم نشود)، رنگ آیکون برابر با پالت `web/app.css`، علامت داخل حاشیهٔ امنی که هیچ لانچری نمی‌بُرد، و اینکه هر مسیری که `android/` را دست می‌زند آیکون‌ها را هم کپی می‌کند. دلیل وجودش این است که این‌ها بی‌صدا خراب می‌شوند: اپ ساخته می‌شود، هیچ خطایی نمی‌دهد، و فقط روی گوشی معلوم می‌شود که آیکونش لوگوی Capacitor است.
+
+اگر Node نصب نباشد، چهار مجموعهٔ پایتونی اجرا می‌شوند و در خلاصه صریح نوشته می‌شود که دو تای دیگر اجرا نشده‌اند — نه اینکه کار نیمه‌تمام موفق گزارش شود. برای اجرای فقط بخش جاوااسکریپت: `npm test`.
 
 ---
 
@@ -154,10 +172,10 @@ Request your archive from X (`Settings and privacy` → `Your account` → `Down
 pip install -r requirements.txt   # fastapi + uvicorn, needed by the web version
 python x_analyzer_server.py       # web:     http://127.0.0.1:8000
 python x_follow_analyzer.py       # desktop: nothing but Python (openpyxl if you export)
-python tests/run_all.py           # all five suites
+python tests/run_all.py           # all six suites, 340 checks
 ```
 
-On Windows, `Run.bat` offers the same three choices as a menu. For the Android APK, see [ANDROID.md](ANDROID.md). The desktop version also exports the list to `.xlsx`; that button is the only thing in the project that wants `openpyxl`, and it tells you the install command rather than crashing if it is missing.
+On Windows, `Run.bat` offers all four of these as a menu, the last being `powershell -ExecutionPolicy Bypass -File build-apk.ps1`, which takes a fresh clone all the way to `dist\follow-desk-debug.apk` — finding a JDK, finding or installing the Android SDK, and writing the `local.properties` Gradle wants. [ANDROID.md](ANDROID.md) covers the manual route and every error either path can produce. The desktop version also exports the list to `.xlsx`; that button is the only thing in the project that wants `openpyxl`, and it tells you the install command rather than crashing if it is missing.
 
 The interface is a triage desk rather than a dashboard. One account occupies the card at the centre; `Enter` (or `O`) opens the profile in a new tab and records it as handled so it never comes back, `Space` (or `S`) sends it to the back of the queue without recording anything, `U` undoes the last decision, `B` opens the next batch of 5, 10, 20 or 50, and `1` `2` `3` switch between the queue, the full list and everything you have already dealt with. None of them fire while you are typing in the search box. The desktop version adds `→` for next, `T` for the theme, `Ctrl+O` to pick an archive and `Esc` to dismiss a message. The counter above the card drains as you work; totals live in a thin rail where they cannot compete with the decision in front of you.
 

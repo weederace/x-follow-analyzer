@@ -139,21 +139,27 @@ print("\n[6] The endpoint really serves the fixed parser, not a stale copy")
 # The point of extracting archive_parser was that the fix reaches the running app.
 # This drives the HTTP handler end to end over the same fixture the parser tests use,
 # so a future re-inlining of the parser would break here rather than pass silently.
+#
+# Built here from tests/fixture.py rather than read from a file on disk. It used to look
+# for /tmp/fixture_archive.zip, which test_analyzer.mjs writes -- and that suite runs
+# *after* this one, so these five checks only ran when a previous invocation happened to
+# leave the file behind. Which means the section guarding "the fix reaches the API" was
+# quietly skipped on any clean machine, and reported a missing fixture as a failure of
+# test_parser.py, which never wrote it in the first place.
+import fixture as archive_fixture
+
 def analyze_ok(data):
     return run(srv2.analyze_archive(_Req(GOOD), FakeUpload(data)))
 
-fixture = pathlib.Path("/tmp/fixture_archive.zip")
-if fixture.is_file():
-    payload = analyze_ok(fixture.read_bytes())
-    ids = [r["account_id"] for r in payload["not_following"]]
-    check("account 202 reaches the API response", "202" in ids)
-    check("no ids leaked from follower-requests-sent.js",
-          not ({"999", "888", "777", "666", "555"} & set(ids)))
-    check("followers not inflated by request files", payload["stats"]["followers"] == 3)
-    check("handle read from account.js", payload["account_username"] == "ashka")
-    check("the API reports which files it skipped", len(payload["ignored_files"]) == 5)
-else:
-    check("fixture archive present (run test_parser.py first)", False)
+payload = analyze_ok(archive_fixture.build())
+ids = [r["account_id"] for r in payload["not_following"]]
+check("account 202 reaches the API response", "202" in ids)
+check("no ids leaked from follower-requests-sent.js",
+      not ({"999", "888", "777", "666", "555"} & set(ids)))
+check("followers not inflated by request files", payload["stats"]["followers"] == 3)
+check("handle read from account.js",
+      payload["account_username"] == archive_fixture.USERNAME)
+check("the API reports which files it skipped", len(payload["ignored_files"]) == 5)
 
 print("\n[7] DELETE /api/history with ids = the undo behind a mis-click")
 history_store_mod = sys.modules["history_store"]

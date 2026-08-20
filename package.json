@@ -6,10 +6,11 @@
   "description": "Find the accounts you follow that do not follow you back. Reads your X archive on your own device.",
   "license": "MIT",
   "scripts": {
-    "android:init": "cap add android",
-    "android:sync": "cap sync android",
-    "android:apk": "cap sync android && cd android && gradlew.bat assembleDebug",
-    "android:apk:unix": "cap sync android && cd android && ./gradlew assembleDebug",
+    "android:init": "cap add android && npm run android:res",
+    "android:res": "node tools/apply-android-res.mjs",
+    "android:sync": "cap sync android && npm run android:res",
+    "android:apk": "cap sync android && npm run android:res && cd android && gradlew.bat assembleDebug",
+    "android:apk:unix": "cap sync android && npm run android:res && cd android && ./gradlew assembleDebug",
     "android:open": "cap open android",
     "test": "node tests/test_analyzer.mjs && node tests/test_frontend.mjs"
   },

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The launch screen, referenced by AppTheme.NoActionBarLaunch in values/styles.xml.
+     Capacitor ships eleven splash.png files, one per density and orientation, each
+     stretched to fill the window and each carrying its own template logo. A layer-list
+     is one file, is never stretched, and reuses the icon's foreground — so the launch
+     is the desk colour with the mark centred on it, and the WebView opening on the
+     same colour is invisible rather than a flash.
+     tools/apply-android-res.mjs deletes those PNGs, because a bitmap variant of the
+     same resource name would win on whichever density it matched. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item><color android:color="#BAC5BF"/></item>
+    <item>
+        <bitmap android:src="@mipmap/ic_launcher_foreground"
+                android:gravity="center"/>
+    </item>
+</layer-list>
