@@ -82,9 +82,9 @@ npm run android:open
 5. در اپ روی «انتخاب فایل آرشیو» بزنید و همان ZIP را انتخاب کنید
 
 فایل ZIP آرشیو معمولاً بین ۵۰ مگابایت تا چند گیگابایت است (بستگی به تعداد
-عکس‌ها و ویدیوهایتان دارد). اپ فقط دو فایل کوچک `following.js` و
-`follower.js` را از داخلش می‌خواند، بقیه را دست نمی‌زند — پس حتی آرشیوهای
-بزرگ هم سریع پردازش می‌شوند.
+عکس‌ها و ویدیوهایتان دارد). اپ از داخلش فقط فهرست فالوور و فالویینگ و فایل
+`account.js` را باز می‌کند و بقیه را حتی از حالت فشرده درنمی‌آورد — پس حتی
+آرشیوهای بزرگ هم سریع پردازش می‌شوند.
 
 ---
 
@@ -103,6 +103,77 @@ npm run android:open
 نسخهٔ دسکتاپ یکی نمی‌شود. اگر روی کامپیوتر ۲۰۰ نفر را بررسی کرده‌اید، روی
 گوشی از صفر شروع می‌کنید. (همگام‌سازی یعنی فرستادن داده به یک سرور، و کل
 منطق این پروژه این است که هیچ‌چیز از دستگاه شما بیرون نرود.)
+
+---
+
+## اگر build شکست خورد
+
+### `SDK location not found`
+
+پیام کامل چیزی شبیه این است:
+
+```
+> SDK location not found. Define a valid SDK location with an ANDROID_HOME
+  environment variable or by setting the sdk.dir path in your project's
+  local properties file at 'D:\...\android\local.properties'.
+```
+
+معنایش این است که Node و Gradle و JDK سالم‌اند و کار تا آخرین قدم پیش رفته؛
+فقط Gradle نمی‌داند Android SDK کجاست. دو حالت دارد.
+
+**حالت اول: SDK نصب است ولی `ANDROID_HOME` تنظیم نشده.** این دستور را در
+PowerShell و در ریشهٔ پروژه اجرا کنید. خودش SDK را پیدا می‌کند و مسیرش را
+می‌نویسد:
+
+```powershell
+$sdk = @("$env:ANDROID_HOME", "$env:ANDROID_SDK_ROOT",
+         "$env:LOCALAPPDATA\Android\Sdk", "C:\Android\Sdk") |
+       Where-Object { $_ -and (Test-Path "$_\platform-tools") } |
+       Select-Object -First 1
+if ($sdk) {
+  "sdk.dir=" + ($sdk -replace '\\','/') | Set-Content -Encoding ASCII android\local.properties
+  "پیدا شد: $sdk  — حالا دوباره npm run android:apk را بزنید"
+} else {
+  "SDK نصب نیست. سراغ حالت دوم بروید."
+}
+```
+
+`local.properties` در `.gitignore` هست، چون مسیر دیسک شخصی شما را نگه می‌دارد
+و روی کامپیوتر کسی دیگر بی‌معنا است.
+
+**حالت دوم: SDK نصب نیست.** لازم نیست کل Android Studio (چند گیگابایت) را نصب
+کنید؛ اگر فقط APK می‌خواهید و به IDE کاری ندارید، ابزارهای خط فرمان کافی‌اند —
+حدود ۱۵۰ مگابایت. از <https://developer.android.com/studio#command-line-tools-only>
+فایل `commandlinetools-win-*.zip` را بگیرید و:
+
+```powershell
+mkdir C:\Android\Sdk\cmdline-tools\latest
+# محتوای زیپ را داخل همین پوشهٔ latest باز کنید (طوری که bin\sdkmanager.bat دیده شود)
+cd C:\Android\Sdk\cmdline-tools\latest\bin
+.\sdkmanager.bat "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+[Environment]::SetEnvironmentVariable('ANDROID_HOME', 'C:\Android\Sdk', 'User')
+```
+
+بعد PowerShell را ببندید و باز کنید (تا متغیر محیطی خوانده شود) و دوباره
+`npm run android:apk` را اجرا کنید.
+
+نسخهٔ ۳۴ اتفاقی نیست: پروژهٔ تولیدشده `compileSdk 34` و `targetSdk 34` می‌خواهد
+و `minSdk 22` است، یعنی اپ روی اندروید ۵.۱ و بالاتر نصب می‌شود.
+
+### `Unsupported class file major version` یا خطای Kotlin/Gradle
+
+یعنی JDK شما جدیدتر از آن است که Capacitor 6 و Gradle 8.2 انتظار دارند. JDK 17
+نصب کنید و همان را به Gradle نشان دهید:
+
+```powershell
+[Environment]::SetEnvironmentVariable('JAVA_HOME', 'C:\Program Files\Java\jdk-17', 'User')
+```
+
+### اولین build کند است
+
+دفعهٔ اول Gradle خودش را (حدود ۱۵۰ مگابایت) دانلود می‌کند و چند دقیقه طول
+می‌کشد — در لاگ `Downloading https://services.gradle.org/...` را می‌بینید. این
+یک‌بار است؛ build های بعدی چند ده ثانیه‌اند.
 
 ---
 
