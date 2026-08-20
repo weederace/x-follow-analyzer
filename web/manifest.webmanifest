@@ -1,0 +1,21 @@
+{
+  "name": "X Follow Analyzer",
+  "short_name": "Follow Desk",
+  "description": "Find the accounts you follow that do not follow you back, and clear them one at a time.",
+  "lang": "fa",
+  "dir": "rtl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#BAC5BF",
+  "theme_color": "#1F4E46",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "any"
+    }
+  ]
+}

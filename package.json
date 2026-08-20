@@ -1,0 +1,23 @@
+{
+  "name": "x-follow-analyzer",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Find the accounts you follow that do not follow you back. Reads your X archive on your own device.",
+  "license": "MIT",
+  "scripts": {
+    "android:init": "cap add android",
+    "android:sync": "cap sync android",
+    "android:apk": "cap sync android && cd android && gradlew.bat assembleDebug",
+    "android:apk:unix": "cap sync android && cd android && ./gradlew assembleDebug",
+    "android:open": "cap open android",
+    "test": "node tests/test_analyzer.mjs && node tests/test_frontend.mjs"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.2.0",
+    "@capacitor/core": "^6.2.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.2.0"
+  }
+}

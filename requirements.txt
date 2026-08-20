@@ -1,3 +1,15 @@
+# Web dashboard  (python x_analyzer_server.py)
 fastapi
 uvicorn
+# Needed by the /api/analyze fallback, which only fires for browsers too old for
+# DecompressionStream. Everyone else parses the ZIP in the page and never uploads.
 python-multipart
+
+# Desktop GUI  (python x_follow_analyzer.py)
+# tkinter is not listed here: it ships with Python on Windows and macOS, and on
+# Debian/Ubuntu it is the separate system package  sudo apt install python3-tk
+#
+# Nothing else is required to triage a queue. The line below is optional and is
+# imported only when you actually press "خروجی اکسل"; skip it and the app tells you
+# the command to run instead of crashing.
+openpyxl>=3.0.0

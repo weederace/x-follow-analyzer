@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<!--
+  The queue is the product. One account fills the stage, you decide, it leaves, the
+  counter drops. Everything else — totals, ratios, the full list — is reference
+  material and sits in the rail where it cannot compete with the decision.
+
+  No CDN, no build step, no framework: the app has to work with the network switched
+  off and inside an Android WebView, so every byte it needs is in this folder.
+-->
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#BAC5BF">
+<title>میز تریاژ فالو</title>
+<link rel="stylesheet" href="app.css">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<!-- Lets the Android build (and any browser's "install") launch it as a real app
+     rather than a tab, which is the whole point of the phone version. -->
+<link rel="manifest" href="manifest.webmanifest">
+<script>
+  // Applied before first paint so the desk never flashes the wrong colour.
+  try {
+    var saved = localStorage.getItem('theme');
+    var dark = saved ? saved === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+    var lang = localStorage.getItem('lang') === 'en' ? 'en' : 'fa';
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === 'fa' ? 'rtl' : 'ltr';
+  } catch (e) { document.documentElement.dataset.theme = 'light'; }
+</script>
+</head>
+<body>
+
+<a class="skip-link" href="#stage" data-t="skipToWork">رفتن به صف</a>
+
+<header class="masthead">
+  <div class="masthead__id">
+    <span class="mark" aria-hidden="true">𝕏</span>
+    <span class="masthead__names">
+      <strong data-t="appName">میز تریاژ</strong>
+      <span class="masthead__sub" data-t="appSub">هیچ داده‌ای از این دستگاه بیرون نمی‌رود</span>
+    </span>
+  </div>
+
+  <div class="masthead__tools">
+    <span class="whoami" id="whoami" hidden></span>
+    <label class="btn btn--quiet file-btn">
+      <span data-t="chooseFile">انتخاب آرشیو</span>
+      <input type="file" id="file" accept=".zip,application/zip" hidden>
+    </label>
+    <button type="button" class="btn btn--icon" id="lang" title="fa / en"><span id="lang-label">EN</span></button>
+    <button type="button" class="btn btn--icon" id="theme" data-t-title="toggleTheme" title="تغییر روشنایی">
+      <span id="theme-glyph" aria-hidden="true">◐</span>
+    </button>
+  </div>
+</header>
+
+<main class="desk">
+
+  <!-- ── the ledger rail: reference only, never the main event ─────────────── -->
+  <aside class="rail" aria-labelledby="rail-title">
+    <h2 class="eyebrow" id="rail-title" data-t="ledger">دفتر حساب</h2>
+
+    <dl class="figures">
+      <div class="figure"><dt data-t="figFollowing">فالو می‌کنی</dt><dd class="num" id="fig-following">—</dd></div>
+      <div class="figure"><dt data-t="figFollowers">فالوت می‌کنند</dt><dd class="num" id="fig-followers">—</dd></div>
+      <div class="figure"><dt data-t="figMutual">دوطرفه</dt><dd class="num" id="fig-mutual">—</dd></div>
+      <div class="figure"><dt data-t="figCleared">رسیدگی‌شده</dt><dd class="num" id="fig-cleared">—</dd></div>
+    </dl>
+
+    <div class="split" id="split" hidden>
+      <div class="split__bar">
+        <span class="split__part split__part--mutual" id="split-mutual"></span>
+        <span class="split__part split__part--open" id="split-open"></span>
+      </div>
+      <p class="split__key">
+        <span class="key key--mutual" data-t="figMutual">دوطرفه</span>
+        <span class="key key--open" data-t="keyOneWay">یک‌طرفه</span>
+      </p>
+      <p class="split__rate"><span class="num" id="fig-rate">—</span> <span data-t="figRate">فالوبک گرفته‌ای</span></p>
+    </div>
+
+    <details class="skipped" id="skipped" hidden>
+      <summary><span id="skipped-count">0</span> <span data-t="skippedFiles">فایل نادیده‌گرفته‌شده</span></summary>
+      <p class="skipped__why" data-t="skippedWhy">این فایل‌ها نام مشابه دارند ولی فهرست فالوور نیستند، پس شمرده نشدند.</p>
+      <ul id="skipped-list"></ul>
+    </details>
+
+    <div class="rail__foot">
+      <p class="storage" id="storage"></p>
+      <button type="button" class="btn btn--danger-quiet" id="forget" data-t="forgetAll">پاک کردن سابقه</button>
+    </div>
+  </aside>
+
+  <!-- ── the stage ────────────────────────────────────────────────────────── -->
+  <section class="stage" id="stage">
+
+    <!-- Signature: the count of what is left, and a spool that drains as you work. -->
+    <div class="tally" id="tally" hidden>
+      <div class="odometer" id="odometer" role="status" aria-live="polite" aria-atomic="true">
+        <span class="sr-only" id="odometer-text"></span>
+      </div>
+      <p class="eyebrow tally__label" data-t="leftInQueue">مانده در صف</p>
+      <div class="spool" aria-hidden="true"><span class="spool__fill" id="spool"></span></div>
+    </div>
+
+    <!-- The number hints sit in a child span so paintWords() can replace the label text
+         without wiping the <kbd> out. On the Android build every kbd is hidden by CSS. -->
+    <nav class="views" id="views" hidden>
+      <button type="button" class="view is-on" data-view="queue"><span data-t="viewQueue">صف</span><kbd>1</kbd></button>
+      <button type="button" class="view" data-view="all"><span data-t="viewAll">فهرست کامل</span><kbd>2</kbd></button>
+      <button type="button" class="view" data-view="done"><span data-t="viewDone">رسیدگی‌شده</span><kbd>3</kbd></button>
+    </nav>
+
+    <!-- start / loading / error all live on a blank docket, so the desk is never empty -->
+    <div class="deck deck--intro" id="intro">
+      <div class="card card--blank" id="dropzone">
+        <p class="card__eyebrow eyebrow" data-t="introEyebrow">پروندهٔ جدید</p>
+        <h1 class="card__lead" data-t="introLead">آرشیو X را روی میز بگذار</h1>
+        <p class="card__note" data-t="introNote">فایل zip همان چیزی است که از Settings → Your account → Download an archive می‌گیری. خواندنش کامل داخل همین صفحه انجام می‌شود.</p>
+        <label class="btn btn--primary">
+          <span data-t="chooseFile">انتخاب آرشیو</span>
+          <input type="file" id="file2" accept=".zip,application/zip" hidden>
+        </label>
+        <p class="card__hint" data-t="introDrop">یا فایل را همین‌جا رها کن</p>
+      </div>
+    </div>
+
+    <div class="deck deck--busy" id="busy" hidden>
+      <div class="card card--blank">
+        <p class="card__eyebrow eyebrow" data-t="busyEyebrow">در حال خواندن</p>
+        <h2 class="card__lead" id="busy-lead" data-t="busyLead">آرشیو باز می‌شود…</h2>
+        <p class="card__note" id="busy-note" data-t="busyNote">فقط فایل‌های فالوور و فالویینگ از حجم استخراج می‌شوند، پس آرشیو چند گیگابایتی هم سریع است.</p>
+        <div class="ticker" aria-hidden="true"><span></span><span></span><span></span></div>
+      </div>
+    </div>
+
+    <!-- the working deck: current card plus the physical depth of what's behind it -->
+    <div class="deck" id="deck" hidden>
+      <div class="card card--ghost" data-depth="3" aria-hidden="true"></div>
+      <div class="card card--ghost" data-depth="2" aria-hidden="true"></div>
+      <div class="card card--ghost" data-depth="1" aria-hidden="true"></div>
+
+      <article class="card card--live" id="card" tabindex="-1" aria-live="polite">
+        <p class="card__eyebrow eyebrow"><span data-t="cardEyebrow">فالو می‌کنی، فالوبک نداده</span></p>
+        <h2 class="card__handle" id="card-handle">@—</h2>
+        <p class="card__id"><span class="eyebrow" data-t="cardId">آیدی</span> <span class="num" id="card-id">—</span></p>
+
+        <div class="stamp" id="stamp" aria-hidden="true"><span data-t="stamped">ثبت شد</span></div>
+
+        <div class="card__actions">
+          <button type="button" class="btn btn--primary" id="act-open">
+            <span data-t="openAndRecord">باز کردن و ثبت</span>
+            <kbd>Enter</kbd>
+          </button>
+          <button type="button" class="btn btn--quiet" id="act-skip">
+            <span data-t="skip">بعدی</span>
+            <kbd>Space</kbd>
+          </button>
+        </div>
+      </article>
+
+      <div class="card card--empty" id="card-empty" hidden>
+        <p class="card__eyebrow eyebrow" data-t="emptyEyebrow">صف تمام شد</p>
+        <h2 class="card__lead" id="empty-lead" data-t="emptyLead">همه را رسیدگی کردی</h2>
+        <p class="card__note" data-t="emptyNote">می‌توانی رسیدگی‌شده‌ها را ببینی، یا آرشیو تازه‌ای بگذاری تا از اول شمرده شود.</p>
+        <button type="button" class="btn btn--quiet" id="empty-see" data-t="viewDone">رسیدگی‌شده</button>
+      </div>
+    </div>
+
+    <div class="undertray" id="undertray" hidden>
+      <div class="batch">
+        <button type="button" class="btn btn--quiet" id="act-batch"><span id="batch-label">باز کردن ۱۰ تای بعدی</span><kbd>B</kbd></button>
+        <label class="batch__size">
+          <span class="eyebrow" data-t="batchSize">تعداد</span>
+          <select id="batch-size">
+            <option value="5">5</option><option value="10" selected>10</option><option value="20">20</option><option value="50">50</option>
+          </select>
+        </label>
+      </div>
+      <button type="button" class="btn btn--ghost" id="act-undo" disabled>
+        <span data-t="undo">برگرداندن</span><kbd>U</kbd>
+      </button>
+    </div>
+
+    <!-- reference views -->
+    <div class="sheet" id="sheet" hidden>
+      <div class="sheet__head">
+        <label class="find">
+          <span class="sr-only" data-t="findLabel">جست‌وجو در فهرست</span>
+          <input type="search" id="find" data-t-placeholder="findPlaceholder" placeholder="جست‌وجوی یوزرنیم یا آیدی">
+        </label>
+        <p class="sheet__count" id="sheet-count"></p>
+      </div>
+      <table class="rows">
+        <thead>
+          <tr>
+            <th data-t="thHandle">یوزرنیم</th>
+            <th data-t="thId">آیدی</th>
+            <th><span class="sr-only" data-t="thAction">عملیات</span></th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+      <p class="sheet__more" id="sheet-more" hidden></p>
+    </div>
+
+    <p class="keys" id="keys" hidden>
+      <kbd>Enter</kbd> <span data-t="keyOpen">باز کردن و ثبت</span>
+      <kbd>Space</kbd> <span data-t="skip">بعدی</span>
+      <kbd>B</kbd> <span data-t="keyBatch">دسته‌ای</span>
+      <kbd>U</kbd> <span data-t="undo">برگرداندن</span>
+    </p>
+  </section>
+</main>
+
+<div class="notice" id="notice" role="alert" hidden>
+  <p id="notice-text"></p>
+  <button type="button" class="notice__x" id="notice-x" aria-label="بستن">×</button>
+</div>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
