@@ -4,7 +4,7 @@ Offline test: stubs fastapi/uvicorn so we can exercise the real server module.
 This suite erases and rewrites the history, so it runs against a throwaway copy —
 see sandbox.py. It must be redirected before x_analyzer_server is imported.
 """
-import sys, types, asyncio, json, pathlib, re
+import sys, types, asyncio, json, pathlib, re, subprocess
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import sandbox
@@ -211,6 +211,37 @@ unused = sorted(n for n in srv2.SERVED_FILES if n != "index.html" and n not in r
 check("no allowlisted file is unreferenced", not unused)
 if unused:
     print(f"        in SERVED_FILES but never loaded: {unused}")
+
+# ==========================================
+# The first run that goes wrong
+# ==========================================
+# Someone who clones the repo and runs this file before installing anything used to be met
+# with a ModuleNotFoundError traceback: five frames of import machinery, and a last line
+# that names a package but not what to do about it. That is the most likely way a first run
+# fails, so the message it prints instead is worth checking like any other output.
+message = srv.missing_dependency_message("fastapi")
+check("the package that is missing is named", "fastapi" in message)
+check("and the command that installs it is spelled out",
+      "pip install -r requirements.txt" in message)
+check("the desktop app is offered too, since that one needs no packages at all",
+      "x_follow_analyzer.py" in message)
+# Not a style rule. This text goes to a Windows console, and when its output is redirected
+# Python encodes it with the machine's legacy code page, where a non-ASCII character raises
+# UnicodeEncodeError — so the message about a missing package would itself crash.
+check("the message is ASCII, which is why it is in English", message.isascii())
+
+# The check above reads the message; this one drives the failure. It can only be driven
+# where fastapi really is absent, so on a machine that has it installed the import simply
+# succeeds and there is nothing to assert — said out loud below rather than hidden, because
+# a check that passes for the wrong reason is worse than one that is skipped.
+probe = subprocess.run([sys.executable, "-c", "import x_analyzer_server"],
+                       cwd=str(PROJECT), capture_output=True, text=True)
+check("a missing package ends in that message and not a traceback",
+      probe.returncode == 0
+      or ("Traceback" not in probe.stderr
+          and "pip install -r requirements.txt" in probe.stderr))
+if probe.returncode == 0:
+    print("        (not driven here: fastapi is installed, so the import succeeded)")
 
 history_store_mod.clear()
 print(f"\n{'='*46}\n  {ok} passed, {fail} failed\n{'='*46}")

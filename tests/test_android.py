@@ -22,6 +22,7 @@ import struct
 import subprocess
 import sys
 import tempfile
+import xml.etree.ElementTree as ET
 import zlib
 from pathlib import Path
 
@@ -131,17 +132,34 @@ def count_near(rows, rgb, tolerance=14):
 CSS = (ROOT / "web" / "app.css").read_text(encoding="utf-8")
 
 
-def css_colour(name):
-    found = re.search(rf"--{name}:\s*#([0-9A-Fa-f]{{6}})", CSS)
+def css_colour(name, block=":root"):
+    """Read one custom property, from the block that declares it.
+
+    The block argument is not decoration. Every token in this stylesheet is declared
+    twice — once in :root for the light theme, once in [data-theme="dark"] — and a
+    plain search over the whole file always returns whichever comes first, which is
+    the light one. Asking for a dark colour without naming its block would silently
+    hand back the light value and the test would pass while the phone looked wrong.
+    """
+    start = CSS.find(f"{block} {{")
+    if start == -1:
+        raise AssertionError(f"{block} is not a block in web/app.css any more")
+    end = CSS.find("}", start)
+    found = re.search(rf"--{name}:\s*#([0-9A-Fa-f]{{6}})", CSS[start:end])
     if not found:
-        raise AssertionError(f"--{name} is not in web/app.css any more")
+        raise AssertionError(f"--{name} is not declared in {block} in web/app.css any more")
     value = found.group(1)
     return tuple(int(value[i:i + 2], 16) for i in (0, 2, 4))
+
+
+def hex6(rgb):
+    return "#%02X%02X%02X" % rgb
 
 
 DESK = css_colour("desk")
 CARD = css_colour("card")
 STAMP = css_colour("stamp")
+DESK_NIGHT = css_colour("desk", '[data-theme="dark"]')
 
 DENSITIES = {"mdpi": 1.0, "hdpi": 1.5, "xhdpi": 2.0, "xxhdpi": 3.0, "xxxhdpi": 4.0}
 
@@ -225,12 +243,36 @@ print("\n[4] The launch screen")
 splash = (RES / "drawable" / "splash.xml").read_text(encoding="utf-8")
 check("splash.xml is a layer-list, so it is never stretched",
       "<layer-list" in splash)
-check("it opens on the same colour as the app", "#%02X%02X%02X" % DESK in splash.upper())
+check("it opens on the same colour as the app", hex6(DESK) in splash.upper())
 for reference in re.findall(r'@(mipmap|drawable|color)/(\w+)', splash):
     kind, name = reference
     if kind == "mipmap":
         exists = all((RES / f"mipmap-{d}" / f"{name}.png").exists() for d in DENSITIES)
         check(f"@mipmap/{name} exists at every density", exists)
+
+print("\n[4b] Night launch screen")
+night_splash = (RES / "drawable-night" / "splash.xml").read_text(encoding="utf-8")
+check("drawable-night/splash.xml exists", "<layer-list" in night_splash)
+# Read from [data-theme="dark"], not written here as a literal: the night splash and the
+# dark interface are the same surface, and a hardcoded hex in this file would keep passing
+# after someone changed the theme.
+check("night splash uses the dark desk colour from web/app.css",
+      hex6(DESK_NIGHT) in night_splash.upper())
+check("and not the light one, which is the whole reason this file exists",
+      DESK_NIGHT != DESK and hex6(DESK) not in night_splash.upper())
+night_styles = (RES / "values-night" / "styles.xml").read_text(encoding="utf-8")
+check("values-night/styles.xml exists", "<resources>" in night_styles)
+check("night styles keep the launch theme", "AppTheme.NoActionBarLaunch" in night_styles)
+
+print("\n[4c] All tracked XML resources are well-formed")
+xml_files = sorted(RES.rglob("*.xml"))
+for path in xml_files:
+    try:
+        ET.parse(path)
+        check(f"{path.relative_to(RES)} parses", True)
+    except ET.ParseError as e:
+        check(f"{path.relative_to(RES)} parses", False)
+        print(f"        {e}")
 
 print("\n[5] The copier is wired into every path that touches android/")
 scripts = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))["scripts"]
@@ -259,8 +301,8 @@ visible = subprocess.run(["git", "ls-files", "--cached", "--others", "--exclude-
 on_disk = sorted(p for p in RES.rglob("*") if p.is_file())
 if visible.returncode == 0:
     listed = [line for line in visible.stdout.splitlines() if line.strip()]
-    check(f"git would carry all {len(on_disk)} icon files into a clone",
-          len(listed) == len(on_disk) and len(on_disk) == 17)
+    check(f"git would carry all {len(on_disk)} resource files into a clone",
+          len(listed) == len(on_disk) and len(on_disk) == 19)
 else:
     check("git is available to confirm the icons would reach a clone", False)
 
@@ -327,6 +369,10 @@ else:
         check("the template logo was overwritten",
               (res / "mipmap-hdpi" / "ic_launcher.png").read_bytes()
               == (RES / "mipmap-hdpi" / "ic_launcher.png").read_bytes())
+        check("night splash was copied into the project",
+              (res / "drawable-night" / "splash.xml").exists())
+        check("night styles were copied into the project",
+              (res / "values-night" / "styles.xml").exists())
         # The declared colour, not any mention of #FFFFFF: the real file explains in a
         # comment that Capacitor leaves this white, so a substring search finds the word
         # in the very file that fixes the problem.
@@ -351,6 +397,109 @@ else:
                                  capture_output=True, text=True)
         check("without android/ it fails loudly instead of silently doing nothing",
               missing.returncode == 1 and "android:init" in missing.stderr)
+
+print("\n[10] The install manifest, and the colours painted before any CSS loads")
+# Three separate files hold a copy of the desk colour, because each is read by something
+# that runs before app.css does: the manifest (the browser's install prompt and PWA splash),
+# the theme-color metas (the Android status bar), and capacitor.config.json (the very first
+# WebView frame). None of them can reference a custom property, so all this suite can do is
+# refuse to let them drift from the stylesheet.
+manifest_text = (ROOT / "web" / "manifest.webmanifest").read_text(encoding="utf-8")
+try:
+    manifest = json.loads(manifest_text)
+    check("web/manifest.webmanifest is valid JSON", True)
+except json.JSONDecodeError as e:
+    manifest = {}
+    check("web/manifest.webmanifest is valid JSON", False)
+    print(f"        {e}")
+
+index = (ROOT / "web" / "index.html").read_text(encoding="utf-8")
+
+# The decision recorded in ANDROID.md: the manifest declares the language of its own
+# strings, which is English, because those strings are the app's name and the name has to
+# match the one the APK installs under. It deliberately does not follow the interface
+# language — that is a runtime choice kept in localStorage, and a static file cannot track
+# it. document.title does, and tests/test_frontend.mjs holds it to that.
+check("short_name is the name the APK installs under, so one app has one name",
+      manifest.get("short_name") == config.get("appName"))
+ARABIC = range(0x0600, 0x0700)
+strings = " ".join(str(manifest.get(key, ""))
+                   for key in ("name", "short_name", "description"))
+persian_script = any(ord(ch) in ARABIC for ch in strings)
+check("the direction it declares is the direction its own strings are written in",
+      (manifest.get("dir") == "rtl") == persian_script)
+check("and the language it declares matches that script too",
+      (manifest.get("lang", "").startswith("fa")) == persian_script)
+
+check("theme_color is --desk from web/app.css", manifest.get("theme_color", "").upper() == hex6(DESK))
+# One colour for both, and it is the light one: the manifest has no media queries, so it
+# cannot answer prefers-color-scheme. The metas below are what do.
+check("background_color is the same colour, since the manifest cannot switch themes",
+      manifest.get("background_color", "").upper() == hex6(DESK))
+check("start_url and scope are relative, so they resolve under file:// in the WebView",
+      str(manifest.get("start_url", "")).startswith(".")
+      and str(manifest.get("scope", "")).startswith("."))
+
+metas = dict((scheme, colour.upper()) for colour, scheme in re.findall(
+    r'<meta name="theme-color" content="(#[0-9A-Fa-f]{6})" '
+    r'media="\(prefers-color-scheme: (light|dark)\)">', index))
+check("the status bar is tinted --desk in daylight", metas.get("light") == hex6(DESK))
+check("and the dark --desk at night", metas.get("dark") == hex6(DESK_NIGHT))
+check("the first WebView frame is the same colour, opaque",
+      config.get("android", {}).get("backgroundColor", "").upper() == hex6(DESK) + "FF")
+
+# The server hands out an allowlist, so a file the manifest points at but the server will
+# not serve is a 404 that only shows up when someone tries to install. Read as text rather
+# than imported: this suite has to run without FastAPI installed.
+served = re.search(r"SERVED_FILES = \{(.*?)\n\}",
+                   (ROOT / "x_analyzer_server.py").read_text(encoding="utf-8"), re.S)
+allowlist = set(re.findall(r'"([\w.]+)":', served.group(1))) if served else set()
+check("the manifest itself is one of the files the server will hand out",
+      "manifest.webmanifest" in allowlist)
+icons = [icon.get("src", "") for icon in manifest.get("icons", [])]
+check("every icon it names is in web/ and served",
+      bool(icons) and all((ROOT / "web" / src).exists() and src in allowlist for src in icons))
+
+print("\n[11] The Persian docs describe the app that exists")
+docs = {name: (ROOT / name).read_text(encoding="utf-8") for name in ("README.md", "ANDROID.md")}
+# A grep cannot judge whether an explanation is any good. What it can do is refuse to let
+# the manifest's language decision go unexplained, because the one thing a reader cannot
+# work out from the file is why it says en while the interface opens in Persian. The two
+# member names are looked for quoted, the way JSON spells them: bare "dir" would be
+# satisfied by the mkdir in a shell example and would prove nothing.
+recorded = docs["ANDROID.md"]
+check("ANDROID.md explains the manifest's language and direction",
+      all(part in recorded for part in ("manifest.webmanifest", '"lang"', '"dir"')))
+# The docs promised @capacitor/filesystem for months. It was never installed, the code never
+# called it, and a reader who went looking for that behaviour would have found nothing.
+for name, text in docs.items():
+    promised = sorted(set(re.findall(r"@capacitor(?:-community)?/[a-z-]+", text)))
+    unmet = [pkg for pkg in promised if pkg not in deps]
+    check(f"{name} promises no plugin that is not installed", not unmet)
+    if unmet:
+        print(f"        promised but absent from package.json: {', '.join(unmet)}")
+
+print("\n[12] Run.bat, the menu most people arrive through")
+# The other Windows launcher, and it fails the same silent way: a goto whose label was
+# renamed prints "The system cannot find the batch label specified" and closes the window,
+# which nobody sees from a shell that is not cmd.exe. Cheap to check, invisible otherwise.
+bat = (ROOT / "Run.bat").read_bytes()
+check("Run.bat is pure ASCII too, for the same codepage reason",
+      all(byte < 127 for byte in bat))
+lines = bat.decode("ascii").splitlines()
+jumps = set(re.findall(r"goto\s+(\w+)", "\n".join(lines)))
+labels = set(line.strip()[1:] for line in lines if re.fullmatch(r":\w+", line.strip()))
+check(f"every goto reaches a label that exists ({len(jumps)} of them)", jumps <= labels)
+if jumps - labels:
+    print(f"        jumps to nothing: {', '.join(sorted(jumps - labels))}")
+# Option 4 is the reason this section is in the Android suite: building the APK is Node and
+# a JDK, no Python anywhere in it, so it is the one menu entry that has to stay reachable on
+# a machine without Python. The check is that it branches away before the interpreter test.
+menu = "\n".join(lines)
+apk_branch = menu.find('if "%choice%"=="4" goto apk')
+python_test = menu.find("-c \"import sys\"")
+check("the APK build branches away before Python is required",
+      apk_branch != -1 and python_test != -1 and apk_branch < python_test)
 
 print(f"\n{'=' * 52}\n  {ok} passed, {fail} failed\n{'=' * 52}")
 sys.exit(1 if fail else 0)

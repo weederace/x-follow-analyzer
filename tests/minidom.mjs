@@ -108,6 +108,12 @@ class Node {
     if (!this.listeners.has(type)) this.listeners.set(type, []);
     this.listeners.get(type).push(fn);
   }
+  removeEventListener(type, fn) {
+    const list = this.listeners.get(type);
+    if (!list) return;
+    const idx = list.indexOf(fn);
+    if (idx !== -1) list.splice(idx, 1);
+  }
   dispatch(type, event = {}) {
     const ev = { type, target: this, preventDefault() {}, ...event };
     for (const fn of this.listeners.get(type) || []) fn(ev);
@@ -273,7 +279,10 @@ export function install(html) {
     open(url) {
       if (globals.popupsBlocked) return null;
       opened.push(url);
-      return { closed: false };
+      // A real handle can be closed, and the pop-up probe in app.js closes the blank tab
+      // it opens. Without close() the probe would either throw or have to guard for a
+      // shape no browser produces, so the shim grows the method instead.
+      return { closed: false, close() { this.closed = true; } };
     },
   };
   return globals;

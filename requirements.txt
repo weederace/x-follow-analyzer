@@ -1,3 +1,5 @@
+# Python 3.9 or newer.
+#
 # Web dashboard  (python x_analyzer_server.py)
 fastapi
 uvicorn

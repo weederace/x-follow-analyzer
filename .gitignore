@@ -29,3 +29,7 @@ local.properties
 # you can look at what it produced. Nothing reads it, and android-res/ already holds the
 # real thing, so committing it would only be a binary that goes stale.
 tools/icon-preview.png
+
+# Somewhere to keep your own notes, drafts and throwaway scripts inside the project
+# without them ever being published. Nothing in the app reads this folder.
+/scratch/

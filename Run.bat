@@ -20,8 +20,14 @@ rem  python is what the Microsoft Store install provides. Try the launcher first
 rem  we do not land on the Store stub that only opens a download page.
 where py >nul 2>nul && (set PY=py) || (set PY=python)
 
-if "%choice%"=="3" goto tests
+rem  The APK build leaves first because it is the one option that does not need Python
+rem  (Node and a JDK do that work). Everything after this line does, so it is checked
+rem  once, here: on a computer that has never run Python this is the first thing that
+rem  goes wrong, and it is worth one sentence instead of "'python' is not recognized"
+rem  four lines further down, or the Store stub quietly opening a download page.
 if "%choice%"=="4" goto apk
+%PY% -c "import sys" >nul 2>nul || goto nopython
+if "%choice%"=="3" goto tests
 
 echo.
 echo Installing what is missing (nothing happens if it is already there)...
@@ -49,6 +55,17 @@ rem  -ExecutionPolicy Bypass applies to this one process only and changes nothin
 rem  machine: the default policy blocks unsigned local scripts, and this is one.
 echo.
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0build-apk.ps1"
+goto done
+
+:nopython
+echo.
+echo   Python is not installed, or is not on your PATH.
+echo.
+echo   Get it from  https://www.python.org/downloads/
+echo   In the installer, tick "Add python.exe to PATH". That one checkbox is what is
+echo   missing when Python is installed and you still see this message.
+echo.
+echo   Option 4 above (build the Android APK) does not need Python.
 
 :done
 echo.

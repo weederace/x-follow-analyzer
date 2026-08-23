@@ -22,11 +22,18 @@ import { createHistory } from './history.js';
 const WORDS = {
   fa: {
     appName: 'میز تریاژ',
+    docTitle: 'میز تریاژ فالو',
     appSub: 'هیچ داده‌ای از این دستگاه بیرون نمی‌رود',
     skipToWork: 'رفتن به صف',
     chooseFile: 'انتخاب آرشیو',
     newFile: 'آرشیو دیگر',
     toggleTheme: 'تغییر روشنایی',
+    themeSystem: 'روشنایی خودکار',
+    themeLight: 'حالت روشن',
+    themeDark: 'حالت تاریک',
+    switchLang: 'تغییر زبان',
+    close: 'بستن',
+    cancel: 'انصراف',
     ledger: 'دفتر حساب',
     figFollowing: 'فالو می‌کنی',
     figFollowers: 'فالوت می‌کنند',
@@ -43,9 +50,23 @@ const WORDS = {
     viewQueue: 'صف',
     viewAll: 'فهرست کامل',
     viewDone: 'رسیدگی‌شده',
+    welcomeEyebrow: 'خوش آمدی',
+    welcomeLead: 'میز تریاژ فالو',
+    welcomeCheck: 'بررسی کن',
+    welcomeDismiss: 'متوجه شدم',
+    welcomeHelp: 'راهنما',
+    welcomeReady: 'همه‌چیز آماده است. هیچ داده‌ای از این دستگاه بیرون نمی‌رود؛ آرشیو را انتخاب کن.',
+    welcomeNativeReady: 'اپ آماده است. آرشیو را انتخاب کن.',
+    welcomePopupsBlocked: 'مرورگر باز شدن تب‌ها را مسدود کرده. اگر از «باز کردن دسته‌ای» استفاده می‌کنی، در نوار آدرس اجازهٔ pop-up بده و دوباره بررسی کن.',
+    welcomeStorageBlocked: 'مرورگر ذخیره‌سازی را مسدود کرده. تصمیم‌ها بعد از بستن صفحه یادت نمی‌ماند.',
+    lastArchive: 'آخرین آرشیو',
+    lastArchiveNone: 'هنوز آرشیوی باز نشده',
+    justNow: 'همین الان',
+    timeAgo: (value, unit) => `${value} ${unit} پیش`,
+    timeUnit: { second: 'ثانیه', seconds: 'ثانیه', minute: 'دقیقه', minutes: 'دقیقه', hour: 'ساعت', hours: 'ساعت', day: 'روز', days: 'روز' },
     introEyebrow: 'پروندهٔ جدید',
     introLead: 'آرشیو X را روی میز بگذار',
-    introNote: 'فایل zip را از Settings → Your account → Download an archive می‌گیری. خواندنش کامل داخل همین صفحه انجام می‌شود.',
+    introNote: 'فایل zip را از Settings → Your account → Download an archive بگیر، بعد انتخابش کن یا بکش اینجا. خواندنش کامل داخل همین صفحه انجام می‌شود.',
     introDrop: 'یا فایل را همین‌جا رها کن',
     busyEyebrow: 'در حال خواندن',
     busyLead: 'آرشیو باز می‌شود…',
@@ -59,6 +80,7 @@ const WORDS = {
     undo: 'برگرداندن',
     batchSize: 'تعداد',
     batchOpen: (n) => `باز کردن ${n} تای بعدی`,
+    batchOpenNative: (n) => `باز کردن ${n} تای بعدی`,
     emptyEyebrow: 'صف تمام شد',
     emptyLead: 'همه را رسیدگی کردی',
     emptyNote: 'می‌توانی رسیدگی‌شده‌ها را ببینی، یا آرشیو تازه‌ای بگذاری تا از نو شمرده شود.',
@@ -86,16 +108,24 @@ const WORDS = {
     errNoFollowData: 'در این آرشیو فهرست فالوور و فالویینگ نبود. آرشیو کامل حساب را انتخاب کن، نه فایل جداگانه.',
     errUnknown: 'خواندن این آرشیو ممکن نشد.',
     popupBlocked: 'مرورگر جلوی باز شدن تب‌ها را گرفت. در نوار آدرس اجازهٔ pop-up را برای این صفحه بده و دوباره بزن. هرچه باز نشد، سر جایش در صف ماند.',
+    popupBlockedNative: 'پروفایل به مرورگر سیستم سپرده شد. اگر چیزی باز نشد، یک مرورگر پیش‌فرض تنظیم کن.',
     historyOffline: 'ثبت روی سرور انجام نشد. تا وقتی سرور برنگردد، این تصمیم‌ها بعد از بستن صفحه یادت نمی‌ماند.',
     confirmForget: 'همهٔ سابقهٔ رسیدگی پاک شود؟ بعد از این، هر پروفایل دوباره در صف می‌آید.',
   },
   en: {
     appName: 'Triage Desk',
+    docTitle: 'Follow Triage Desk',
     appSub: 'Nothing leaves this device',
     skipToWork: 'Skip to the queue',
     chooseFile: 'Choose archive',
     newFile: 'Another archive',
     toggleTheme: 'Switch light and dark',
+    themeSystem: 'Auto theme',
+    themeLight: 'Light theme',
+    themeDark: 'Dark theme',
+    switchLang: 'Switch language',
+    close: 'Close',
+    cancel: 'Cancel',
     ledger: 'Ledger',
     figFollowing: 'You follow',
     figFollowers: 'Follow you',
@@ -112,9 +142,23 @@ const WORDS = {
     viewQueue: 'Queue',
     viewAll: 'Full list',
     viewDone: 'Recorded',
+    welcomeEyebrow: 'Welcome',
+    welcomeLead: 'Follow Triage Desk',
+    welcomeCheck: 'Check',
+    welcomeDismiss: 'Got it',
+    welcomeHelp: 'Help',
+    welcomeReady: 'Everything is ready. Nothing leaves this device; pick your archive below.',
+    welcomeNativeReady: 'The app is ready. Pick your archive below.',
+    welcomePopupsBlocked: 'Your browser is blocking new tabs. If you use batch-open, allow pop-ups for this page in the address bar, then check again.',
+    welcomeStorageBlocked: 'Your browser is blocking storage. Decisions will not be remembered after you close the page.',
+    lastArchive: 'Last archive',
+    lastArchiveNone: 'No archive opened yet',
+    justNow: 'just now',
+    timeAgo: (value, unit) => `${value} ${unit} ago`,
+    timeUnit: { second: 'second', seconds: 'seconds', minute: 'minute', minutes: 'minutes', hour: 'hour', hours: 'hours', day: 'day', days: 'days' },
     introEyebrow: 'New case',
     introLead: 'Put your X archive on the desk',
-    introNote: 'The .zip comes from Settings → Your account → Download an archive. It is read entirely inside this page.',
+    introNote: 'Get the .zip from Settings → Your account → Download an archive, then choose it here or drop it. It is read entirely inside this page.',
     introDrop: 'or drop the file here',
     busyEyebrow: 'Reading',
     busyLead: 'Opening the archive…',
@@ -128,6 +172,7 @@ const WORDS = {
     undo: 'Undo',
     batchSize: 'How many',
     batchOpen: (n) => `Open the next ${n}`,
+    batchOpenNative: (n) => `Open next ${n}`,
     emptyEyebrow: 'Queue clear',
     emptyLead: 'You went through all of them',
     emptyNote: 'Look back over what you recorded, or drop in a fresh archive to count again.',
@@ -154,6 +199,7 @@ const WORDS = {
     errNoFollowData: 'No follower or following lists in that archive. Pick the full account archive, not a single file.',
     errUnknown: 'Could not read that archive.',
     popupBlocked: 'The browser blocked the new tabs. Allow pop-ups for this page in the address bar, then press it again. Anything that did not open stayed in the queue.',
+    popupBlockedNative: 'The profile was handed to the system browser. If nothing opened, set a default browser.',
     historyOffline: 'That did not save to the server. Until it is back, these decisions won’t be remembered after you close the page.',
     confirmForget: 'Erase the whole review history? Every profile goes back into the queue.',
   },
@@ -166,6 +212,8 @@ const el = (id) => document.getElementById(id);
 const history = createHistory();
 
 let lang = document.documentElement.lang === 'en' ? 'en' : 'fa';
+let themeMode = document.documentElement.dataset.themeMode || 'system';
+let welcomeDismissed = false;
 let oneWay = [];        // every account in this archive that does not follow back
 let queue = [];         // the ones still to decide on, in working order
 let view = 'queue';
@@ -194,6 +242,7 @@ if (NATIVE) document.documentElement.dataset.native = 'true';
 function paintWords() {
   document.documentElement.lang = lang;
   document.documentElement.dir = lang === 'fa' ? 'rtl' : 'ltr';
+  document.title = t('docTitle');
   el('lang-label').textContent = lang === 'fa' ? 'EN' : 'فا';
 
   document.querySelectorAll('[data-t]').forEach((node) => {
@@ -206,19 +255,60 @@ function paintWords() {
   document.querySelectorAll('[data-t-placeholder]').forEach((node) => {
     node.placeholder = WORDS[lang][node.dataset.tPlaceholder] || node.placeholder;
   });
+  document.querySelectorAll('[data-t-aria-label]').forEach((node) => {
+    const value = WORDS[lang][node.dataset.tAriaLabel];
+    if (typeof value === 'string') {
+      node.setAttribute('aria-label', value);
+      node.title = value;
+    }
+  });
 
-  el('batch-label').textContent = t('batchOpen')(batchSize());
+  paintBatchLabels();
   el('storage').textContent = history.mode === 'server' ? t('storageServer') : t('storageDevice');
   paintCard();
   paintFigures();
   paintTally();   // the counter's caption is words too, so it has to be redrawn here
   paintSheet();
+  paintLastArchive();
+  setTheme(themeMode); // keep the theme button label in the active language
 }
 
-function setTheme(dark) {
-  document.documentElement.dataset.theme = dark ? 'dark' : 'light';
-  el('theme-glyph').textContent = dark ? '◑' : '◐';
-  try { localStorage.setItem('theme', dark ? 'dark' : 'light'); } catch { /* blocked */ }
+function effectiveTheme(mode) {
+  if (mode === 'dark') return 'dark';
+  if (mode === 'light') return 'light';
+  return matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
+function updateThemeColorMeta() {
+  if (typeof getComputedStyle !== 'function') return;
+  const desk = getComputedStyle(document.documentElement).getPropertyValue('--desk').trim();
+  if (!desk) return;
+  let meta = document.querySelector('meta[name="theme-color"]:not([media])');
+  if (!meta) {
+    meta = document.createElement('meta');
+    meta.name = 'theme-color';
+    document.head.append(meta);
+  }
+  meta.content = desk;
+}
+
+function setTheme(mode) {
+  if (mode !== 'light' && mode !== 'dark' && mode !== 'system') mode = 'system';
+  themeMode = mode;
+  const effective = effectiveTheme(mode);
+  document.documentElement.dataset.theme = effective;
+  document.documentElement.dataset.themeMode = mode;
+
+  const glyphs = { system: '◐', light: '☀', dark: '☾' };
+  el('theme-glyph').textContent = glyphs[mode];
+
+  const title = t(`theme${mode[0].toUpperCase()}${mode.slice(1)}`);
+  const btn = el('theme');
+  btn.title = title;
+  btn.setAttribute('aria-label', title);
+
+  try { localStorage.setItem('theme', mode); } catch { /* blocked */ }
+  updateThemeColorMeta();
 }
 
 function say(key) {
@@ -226,6 +316,39 @@ function say(key) {
   el('notice').hidden = false;
 }
 function hush() { el('notice').hidden = true; }
+
+/**
+ * Replaces the native confirm() dialog with an in-app modal. Returns a promise that
+ * resolves to true if the person confirmed, false if they cancelled. The destructive
+ * action is styled as secondary so a slip of the thumb does not erase anything.
+ */
+function askConfirm({ title, body, action, danger = false }) {
+  return new Promise((resolve) => {
+    const dialog = el('confirm');
+    const titleEl = el('confirm-title');
+    const bodyEl = el('confirm-body');
+    const actionBtn = el('confirm-action');
+    const cancelBtn = el('confirm-cancel');
+
+    titleEl.textContent = title;
+    bodyEl.textContent = body;
+    actionBtn.textContent = action;
+    actionBtn.className = danger ? 'btn btn--danger' : 'btn btn--primary';
+    cancelBtn.textContent = t('cancel');
+
+    const cleanup = () => {
+      dialog.hidden = true;
+      actionBtn.removeEventListener('click', onAction);
+      cancelBtn.removeEventListener('click', onCancel);
+    };
+    const onAction = () => { cleanup(); resolve(true); };
+    const onCancel = () => { cleanup(); resolve(false); };
+
+    actionBtn.addEventListener('click', onAction);
+    cancelBtn.addEventListener('click', onCancel);
+    dialog.hidden = false;
+  });
+}
 
 // ---------------------------------------------------------------------------
 // The counter: the one element this desk is built around
@@ -362,7 +485,7 @@ function advance({ record }) {
  */
 function openAndRecord(person) {
   const win = window.open(person.url, '_blank', 'noopener');
-  if (!win) { say('popupBlocked'); return false; }
+  if (!win) { say(NATIVE ? 'popupBlockedNative' : 'popupBlocked'); return false; }
   hush();
   record([person.account_id]);
   return true;
@@ -475,7 +598,7 @@ function paintSheet() {
       button.textContent = t('rowOpen');
       button.addEventListener('click', () => {
         const win = window.open(person.url, '_blank', 'noopener');
-        if (!win) { say('popupBlocked'); return; }
+        if (!win) { say(NATIVE ? 'popupBlockedNative' : 'popupBlocked'); return; }
         hush();
         if (!done) {
           record([person.account_id]);
@@ -534,6 +657,19 @@ function batchSize() {
   return value;
 }
 
+/**
+ * Both batch buttons say how many tabs they will open, so both have to be redrawn
+ * whenever that number or the language changes. One function rather than two call sites:
+ * the phone shows the in-card button and the desktop shows the undertray one, so a
+ * missed repaint is invisible on the machine you are testing and wrong on the other.
+ */
+function paintBatchLabels() {
+  const count = batchSize();
+  el('batch-label').textContent = t('batchOpen')(count);
+  const native = el('batch-native-label');
+  if (native) native.textContent = t('batchOpenNative')(count);
+}
+
 function openBatch() {
   const batch = queue.slice(0, batchSize());
   if (!batch.length) return;
@@ -546,7 +682,7 @@ function openBatch() {
     else { blocked = true; break; }   // once the blocker trips, the rest will fail too
   }
 
-  if (blocked) say('popupBlocked'); else hush();
+  if (blocked) say(NATIVE ? 'popupBlockedNative' : 'popupBlocked'); else hush();
   if (!opened.length) return;
 
   const done = new Set(opened);
@@ -560,6 +696,52 @@ function openBatch() {
 // ---------------------------------------------------------------------------
 // Reading an archive
 // ---------------------------------------------------------------------------
+function isWelcomeDismissed() {
+  if (welcomeDismissed) return true;
+  try { return localStorage.getItem('welcomeDismissed') === 'true'; } catch { return false; }
+}
+
+function dismissWelcome() {
+  welcomeDismissed = true;
+  try { localStorage.setItem('welcomeDismissed', 'true'); } catch { /* blocked */ }
+  paintWelcome();
+}
+
+function probeBrowser() {
+  const state = { popups: true, storage: true };
+  if (!NATIVE) {
+    const win = window.open('', '_blank');
+    state.popups = Boolean(win);
+    if (win && typeof win.close === 'function') win.close();
+  }
+  try {
+    const key = 'x_probe_' + Date.now();
+    localStorage.setItem(key, '1');
+    localStorage.removeItem(key);
+  } catch {
+    state.storage = false;
+  }
+  return state;
+}
+
+function welcomeMessage(state) {
+  if (NATIVE) return t('welcomeNativeReady');
+  const parts = [];
+  if (!state.popups) parts.push(t('welcomePopupsBlocked'));
+  if (!state.storage) parts.push(t('welcomeStorageBlocked'));
+  if (parts.length === 0) return t('welcomeReady');
+  return parts.join(' ');
+}
+
+function paintWelcome() {
+  const welcome = el('welcome');
+  const body = el('welcome-body');
+  if (!welcome || !body) return;
+  const show = !(welcomeDismissed || isWelcomeDismissed()) && !el('intro').hidden;
+  welcome.hidden = !show;
+  if (show) body.textContent = welcomeMessage(probeBrowser());
+}
+
 function showStage(which) {
   el('intro').hidden = which !== 'intro';
   el('busy').hidden = which !== 'busy';
@@ -568,14 +750,17 @@ function showStage(which) {
   el('views').hidden = !working;
   if (working) setView('queue');
   else { el('deck').hidden = true; el('undertray').hidden = true; el('keys').hidden = true; el('sheet').hidden = true; }
+  paintWelcome();
 }
 
 /**
  * Old browsers without DecompressionStream cannot inflate in the page. When the
  * Python server is the one serving us, hand the file to it rather than failing.
  */
-async function readArchive(file) {
-  if (typeof DecompressionStream === 'function') return analyzeArchive(file);
+async function readArchive(file, { onProgress } = {}) {
+  if (typeof DecompressionStream === 'function') return analyzeArchive(file, { onProgress });
+  // Older browsers without DecompressionStream fall back to the Python server;
+  // progress cannot be streamed from that endpoint.
   const form = new FormData();
   form.append('file', file);
   const response = await fetch('/api/analyze', { method: 'POST', body: form });
@@ -595,21 +780,83 @@ function failureKey(error) {
   return 'errUnknown';
 }
 
+function formatTimeAgo(ms) {
+  const seconds = Math.round(ms / 1000);
+  if (seconds < 10) return t('justNow');
+  const minutes = Math.round(seconds / 60);
+  if (minutes < 2) {
+    const unit = t('timeUnit')[seconds === 1 ? 'second' : 'seconds'];
+    return t('timeAgo')(seconds, unit);
+  }
+  const hours = Math.round(minutes / 60);
+  if (hours < 2) {
+    const unit = t('timeUnit')[minutes === 1 ? 'minute' : 'minutes'];
+    return t('timeAgo')(minutes, unit);
+  }
+  const days = Math.round(hours / 24);
+  if (days < 2) {
+    const unit = t('timeUnit')[hours === 1 ? 'hour' : 'hours'];
+    return t('timeAgo')(hours, unit);
+  }
+  const unit = t('timeUnit')[days === 1 ? 'day' : 'days'];
+  return t('timeAgo')(days, unit);
+}
+
+function readLastArchive() {
+  try {
+    const raw = localStorage.getItem('x_last_archive');
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
+
+function writeLastArchive(file) {
+  if (!file) return;
+  const record = { name: file.name, size: file.size, lastModified: file.lastModified, readAt: Date.now() };
+  try { localStorage.setItem('x_last_archive', JSON.stringify(record)); } catch { /* blocked */ }
+}
+
+function clearLastArchive() {
+  try { localStorage.removeItem('x_last_archive'); } catch { /* blocked */ }
+}
+
+function paintLastArchive() {
+  const node = el('last-archive');
+  if (!node) return;
+  const record = readLastArchive();
+  if (!record) {
+    node.textContent = `${t('lastArchive')}: ${t('lastArchiveNone')}`;
+    return;
+  }
+  const ago = formatTimeAgo(Date.now() - record.readAt);
+  node.textContent = `${t('lastArchive')}: ${record.name} — ${ago}`;
+}
+
+function setReadProgress(fraction) {
+  const busySpool = el('busy-spool');
+  if (busySpool) busySpool.style.width = `${Math.max(0, Math.min(1, fraction)) * 100}%`;
+}
+
 async function loadArchive(file) {
   if (!file) return;
   hush();
   cancelStamp();
   showStage('busy');
+  setReadProgress(0);
 
   let result;
   try {
-    result = await readArchive(file);
+    result = await readArchive(file, {
+      onProgress: ({ fraction }) => setReadProgress(fraction),
+    });
   } catch (error) {
+    setReadProgress(0);
     showStage('intro');
+    paintLastArchive();
     say(failureKey(error));
     return;
   }
 
+  writeLastArchive(file);
   stats = result.stats;
   skippedFiles = result.ignored_files || [];
   oneWay = result.not_following;
@@ -636,6 +883,23 @@ async function loadArchive(file) {
 el('file').addEventListener('change', (event) => loadArchive(event.target.files[0]));
 el('file2').addEventListener('change', (event) => loadArchive(event.target.files[0]));
 
+// Android's document picker filters by MIME type, and Downloads / Drive / Telegram
+// frequently report a ZIP as application/octet-stream or application/x-zip-compressed.
+// In the Capacitor build we remove the accept attribute so the archive is selectable;
+// the browser keeps it because providers there report real MIME types. Content validation
+// in web/zip.js still rejects a non-ZIP with a clear message.
+if (NATIVE) {
+  for (const id of ['file', 'file2']) {
+    const input = el(id);
+    if (input) input.removeAttribute('accept');
+  }
+  // The in-card batch button ships hidden so it never flashes before this runs. Clearing
+  // the attribute here rather than leaning on the CSS rule keeps one mechanism in charge:
+  // a `display` declaration does override [hidden], but only until someone reorders the
+  // stylesheet, and assistive technology should not have to guess which one won.
+  el('act-batch-native')?.removeAttribute('hidden');
+}
+
 const zone = el('dropzone');
 ['dragenter', 'dragover'].forEach((type) => zone.addEventListener(type, (event) => {
   event.preventDefault();
@@ -654,8 +918,16 @@ el('lang').addEventListener('click', () => {
 });
 
 el('theme').addEventListener('click', () => {
-  setTheme(document.documentElement.dataset.theme !== 'dark');
+  const next = { system: 'light', light: 'dark', dark: 'system' };
+  setTheme(next[themeMode] || 'light');
 });
+
+const darkMedia = matchMedia('(prefers-color-scheme: dark)');
+if (darkMedia && typeof darkMedia.addEventListener === 'function') {
+  darkMedia.addEventListener('change', () => {
+    if (themeMode === 'system') setTheme('system');
+  });
+}
 
 el('act-open').addEventListener('click', () => {
   const person = current();
@@ -664,12 +936,13 @@ el('act-open').addEventListener('click', () => {
 });
 el('act-skip').addEventListener('click', () => { if (!busyCard) advance({ record: false }); });
 el('act-batch').addEventListener('click', openBatch);
+el('act-batch-native')?.addEventListener('click', openBatch);
 el('act-undo').addEventListener('click', undoLast);
 el('empty-see').addEventListener('click', () => setView('done'));
 
 el('batch-size').addEventListener('change', () => {
   try { localStorage.setItem('x_batch_size', el('batch-size').value); } catch { /* blocked */ }
-  el('batch-label').textContent = t('batchOpen')(batchSize());
+  paintBatchLabels();
 });
 
 document.querySelectorAll('.view').forEach((tab) => {
@@ -678,18 +951,37 @@ document.querySelectorAll('.view').forEach((tab) => {
 el('find').addEventListener('input', paintSheet);
 el('notice-x').addEventListener('click', hush);
 
+el('welcome-dismiss')?.addEventListener('click', dismissWelcome);
+el('welcome-check')?.addEventListener('click', paintWelcome);
+el('welcome-help')?.addEventListener('click', () => {
+  welcomeDismissed = false;
+  try { localStorage.removeItem('welcomeDismissed'); } catch { /* blocked */ }
+  paintWelcome();
+});
+
 el('forget').addEventListener('click', async () => {
-  if (!confirm(t('confirmForget'))) return;
+  const confirmed = await askConfirm({
+    title: t('forget'),
+    body: t('confirmForget'),
+    action: t('forget'),
+    danger: true,
+  });
+  if (!confirmed) return;
   const saved = await history.clear();
   if (!saved) { say('historyOffline'); return; }
   cancelStamp();          // a stamp still in flight would advance past the refilled queue
   queue = [...oneWay];
   undoStack = [];
   el('act-undo').disabled = true;
+  welcomeDismissed = false;
+  clearLastArchive();
+  try { localStorage.removeItem('welcomeDismissed'); } catch { /* blocked */ }
   hush();
   paintTally();
   paintCard();
   paintSheet();
+  paintLastArchive();   // the intro card names the last archive; erasing has to unname it
+  paintWelcome();
 });
 
 // Shortcuts. Kept off any element the person might be typing into.
@@ -699,6 +991,13 @@ const VIEW_KEYS = { 1: 'queue', 2: 'all', 3: 'done' };
 
 document.addEventListener('keydown', (event) => {
   const tag = event.target.tagName;
+
+  if (event.key === 'Escape' && el('welcome') && !el('welcome').hidden) {
+    event.preventDefault();
+    dismissWelcome();
+    return;
+  }
+
   if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA' || event.metaKey || event.ctrlKey || event.altKey) return;
 
   // Handled above the guard below, because switching views has to work *from* the other
@@ -741,7 +1040,7 @@ document.addEventListener('keydown', (event) => {
 // ---------------------------------------------------------------------------
 // Start
 // ---------------------------------------------------------------------------
-setTheme(document.documentElement.dataset.theme === 'dark');
+setTheme(themeMode);
 await history.open();
 batchSize();
 paintWords();

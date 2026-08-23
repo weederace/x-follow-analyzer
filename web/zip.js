@@ -125,7 +125,7 @@ function applyZip64Extra(entry, extra) {
  * Open an archive. Returns the entry list plus a read() that decompresses one entry.
  * @param {Blob} blob
  */
-export async function openZip(blob) {
+export async function openZip(blob, { onProgress } = {}) {
   if (!blob || typeof blob.slice !== 'function') throw new ZipError('empty', 'No file to read.');
   if (blob.size < 22) throw new ZipError('empty', 'This file is empty or truncated.');
 
@@ -154,12 +154,13 @@ export async function openZip(blob) {
       applyZip64Extra(entry, directory.subarray(cursor + 46 + nameLength, cursor + 46 + nameLength + extraLength));
     }
     entries.push(entry);
+    if (onProgress) onProgress({ phase: 'directory', scanned: entries.length, total: bounds.entryCount });
     cursor += 46 + nameLength + extraLength + commentLength;
   }
 
   if (entries.length === 0) throw new ZipError('damaged', 'This ZIP archive has no readable entries.');
 
-  async function read(entry) {
+  async function read(entry, { onProgress: entryProgress } = {}) {
     // The local header repeats the name and extra field, and its length varies, so
     // measure it before reading the data. Sizes come from the central directory,
     // which is authoritative even when the local header defers them to a descriptor.
@@ -169,20 +170,25 @@ export async function openZip(blob) {
     const dataStart = entry.offset + 30 + hdv.getUint16(26, true) + hdv.getUint16(28, true);
     const raw = await sliceBytes(blob, dataStart, dataStart + entry.compressedSize);
 
-    if (entry.method === 0) return raw;
+    if (entry.method === 0) {
+      if (entryProgress) entryProgress({ phase: 'entry', read: raw.length, total: raw.length });
+      return raw;
+    }
     if (entry.method !== 8) throw new ZipError('unsupported', `Entry "${entry.name}" uses an unsupported compression method.`);
 
     const stream = new Blob([raw]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
     const chunks = [];
-    let total = 0;
+    let read = 0;
+    const total = entry.uncompressedSize || 1;
     const reader = stream.getReader();
     for (;;) {
       const { done, value } = await reader.read();
       if (done) break;
       chunks.push(value);
-      total += value.length;
+      read += value.length;
+      if (entryProgress) entryProgress({ phase: 'entry', read, total });
     }
-    const out = new Uint8Array(total);
+    const out = new Uint8Array(read);
     let at = 0;
     for (const chunk of chunks) { out.set(chunk, at); at += chunk.length; }
     return out;

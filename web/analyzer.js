@@ -15,6 +15,9 @@ const FOLLOWER_RE = new RegExp(`^followers?${PART}\\.(?:js|json)$`, 'i');
 const FOLLOWING_RE = new RegExp(`^following${PART}\\.(?:js|json)$`, 'i');
 const PROFILE_RE = /^(?:account|profile)\.(?:js|json)$/i;
 
+// How much of the progress bar the central-directory scan gets. See parseArchive().
+const DIRECTORY_SHARE = 0.15;
+
 /**
  * Decide what an archive entry is, by exact basename.
  *
@@ -123,8 +126,22 @@ function readHandle(data) {
  * media-heavy multi-gigabyte export costs no more than a small one.
  * @param {Blob} blob
  */
-export async function parseArchive(blob) {
-  const zip = await openZip(blob);
+export async function parseArchive(blob, { onProgress } = {}) {
+  // Reading happens in two passes — scan the central directory, then decompress the few
+  // entries we want — and each one measures a different thing. Reported as two fractions
+  // they would fill one bar to the end and start it over, which reads as a stall or a
+  // fault. So each pass owns a slice of the single bar: the scan the first
+  // DIRECTORY_SHARE, the read the rest. Every number still comes from the reader; only
+  // the split between them is a display choice, made because the scan is bounded by entry
+  // count and is the short pass on any real archive.
+  const zip = await openZip(blob, {
+    onProgress: (p) => {
+      if (p.phase === 'directory' && onProgress) {
+        const scanned = p.total ? p.scanned / p.total : 0;
+        onProgress({ phase: 'directory', fraction: scanned * DIRECTORY_SHARE });
+      }
+    },
+  });
   const followers = new Map();
   const following = new Map();
   const ignored = [];
@@ -142,10 +159,23 @@ export async function parseArchive(blob) {
     }
   }
 
+  const totalBytes = wanted.reduce((sum, { entry }) => sum + (entry.uncompressedSize || entry.compressedSize || 0), 0);
+  let readBytes = 0;
+
   for (const { entry, kind } of wanted) {
     let text;
+    let previousEntryRead = 0;
     try {
-      text = decoder.decode(await zip.read(entry));
+      text = decoder.decode(await zip.read(entry, {
+        onProgress: (p) => {
+          readBytes += p.read - previousEntryRead;
+          previousEntryRead = p.read;
+          if (onProgress) {
+            const inflated = totalBytes ? readBytes / totalBytes : 0;
+            onProgress({ phase: 'read', fraction: DIRECTORY_SHARE + inflated * (1 - DIRECTORY_SHARE) });
+          }
+        },
+      }));
     } catch { continue; }
     if (text.charCodeAt(0) === 0xfeff) text = text.slice(1);  // strip the BOM
 
@@ -221,8 +251,8 @@ export function analyze({ followers, following, mainUsername = '', ignored = [] 
  * Read a file and return the full analysis payload.
  * Throws with a message meant to be shown to the person, not logged.
  */
-export async function analyzeArchive(blob) {
-  const parsed = await parseArchive(blob);
+export async function analyzeArchive(blob, { onProgress } = {}) {
+  const parsed = await parseArchive(blob, { onProgress });
   if (parsed.followers.size === 0 && parsed.following.size === 0) {
     throw new Error('noFollowData');
   }

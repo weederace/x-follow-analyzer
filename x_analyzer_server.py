@@ -4,9 +4,38 @@ import webbrowser
 import threading
 import time
 from pathlib import Path
-from fastapi import FastAPI, File, UploadFile, Request, HTTPException
-from fastapi.responses import Response
-import uvicorn
+
+
+def missing_dependency_message(name: str) -> str:
+    """The message someone sees when the web version's packages are not installed.
+
+    This is the most likely way a first run fails: clone the repo, run this file, and
+    read a ModuleNotFoundError whose last line names a package but not what to do about
+    it. The message also points at the desktop app, because "install this" is not always
+    the answer the reader wants — that one needs nothing but Python itself.
+
+    English, like build-apk.ps1 and for the same reason: this text goes to a Windows
+    console whose code page is not UTF-8, and a log that arrives as question marks is
+    worse than a log in the wrong language.
+    """
+    return (
+        f"\n  The web version needs a package that is not installed: {name}\n\n"
+        "  Install what it needs:  python -m pip install -r requirements.txt\n"
+        "  Then run this again:    python x_analyzer_server.py\n\n"
+        "  Or skip installing anything. The desktop version needs only Python:\n"
+        "      python x_follow_analyzer.py\n"
+        "  (on Debian or Ubuntu it also needs:  sudo apt install python3-tk)\n"
+    )
+
+
+try:
+    from fastapi import FastAPI, File, UploadFile, Request, HTTPException
+    from fastapi.responses import Response
+    import uvicorn
+except ModuleNotFoundError as missing:
+    # from None: the traceback is five frames of import machinery and the reader is
+    # someone who wanted to look at a list of accounts, not debug a stack.
+    raise SystemExit(missing_dependency_message(missing.name or "fastapi")) from None
 
 import archive_parser
 import history_store
@@ -211,7 +240,11 @@ def open_browser():
     webbrowser.open(f"http://{HOST}:{PORT}")
 
 if __name__ == "__main__":
-    print("🚀 X Follow Analyzer")
+    # ASCII on purpose. This goes to a Windows console, and when someone redirects the
+    # output to a file Python encodes it with the machine's legacy code page, where one
+    # non-ASCII character raises UnicodeEncodeError and takes the server down before it
+    # has served a page. tests/run_all.py keeps the same rule for the same reason.
+    print("X Follow Analyzer")
     print(f"   Dashboard : http://{HOST}:{PORT}")
     print(f"   History   : {history_store.history_path()}")
     print("   Press Ctrl+C to stop.")

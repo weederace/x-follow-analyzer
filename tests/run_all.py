@@ -30,7 +30,7 @@ JS_SUITES = ["test_analyzer.mjs", "test_frontend.mjs"]
 
 
 def run(label: str, argv: list[str]) -> bool:
-    print(f"\n{'━' * 68}\n  {label}\n{'━' * 68}")
+    print(f"\n{'-' * 68}\n  {label}\n{'-' * 68}")
     result = subprocess.run(argv, cwd=str(HERE.parent))
     return result.returncode == 0
 
@@ -48,7 +48,7 @@ def main() -> int:
             continue
         (passed if run(name, [node, str(HERE / name)]) else failed).append(name)
 
-    print(f"\n{'═' * 68}")
+    print(f"\n{'=' * 68}")
     print(f"  {len(passed)} suite(s) passed" + (f", {len(failed)} failed" if failed else ""))
     for name in failed:
         print(f"    FAILED  {name}")
@@ -57,7 +57,7 @@ def main() -> int:
         for name in missing:
             print(f"    SKIPPED {name}")
         print("  The web app and the parser-parity checks are untested without it.")
-    print("═" * 68)
+    print("=" * 68)
     return 1 if failed else 0
 
 

@@ -14,7 +14,11 @@
 
 دو تصمیم داری. **باز کردن و ثبت** (`Enter`) پروفایل را در تب تازه باز می‌کند و همان لحظه در تاریخچه ثبتش می‌کند تا دیگر هرگز نبینی‌اش. **بعدی** (`Space`) کارت را به آخر صف می‌فرستد؛ رد کردن، پیشرفت نیست، پس شمارنده تکان نمی‌خورد. اگر اشتباه زدی، `U` آخرین ثبت را برمی‌گرداند و حساب را به بالای صف می‌آورد.
 
+اولین باری که باز می‌کنی یک کارت خوش‌آمدگویی توضیح می‌دهد آرشیو X چیست و از کجا باید بگیری؛ بعد از بستنش، تا وقتی تاریخچه را پاک نکنی دوباره ظاهر نمی‌شود. زبان و روشنایی هم از انتخاب مرورگرت پیروی می‌کنند؛ می‌توانی با دکمه‌های بالای صفحه دستی هم عوضشان کنی.
+
 `B` دسته‌ای باز می‌کند — ۵، ۱۰، ۲۰ یا ۵۰ تا، هرچه خودت انتخاب کنی. `1` `2` `3` بین صف، فهرست کامل و رسیدگی‌شده‌ها جابه‌جا می‌شوند. هیچ‌کدام از این کلیدها وقتی داخل کادر جست‌وجو تایپ می‌کنی عمل نمی‌کنند.
+
+بار بعد که برمی‌گردی، کارت شروع نام آخرین آرشیوی که خوانده‌ای را یادش هست و همان را نشانت می‌دهد، تا وقت تلف نکنی سر اینکه کدام فایل بود. فقط نام و اندازه و تاریخ فایل ذخیره می‌شود و نه یک سطر از فهرست فالوها؛ و چون مرورگر اجازه نمی‌دهد فایلی را از روی مسیرش دوباره باز کنیم، این یادآوری است نه میان‌بر — همان فایل را باید دوباره انتخاب کنی. خواندنش هم نوار پیشرفت واقعی دارد: عددها از خود خوانندهٔ ZIP می‌آید، نه از یک انیمیشن، پس روی آرشیو چندگیگابایتی معلوم است که کار پیش می‌رود و برنامه گیر نکرده.
 
 روی کامپیوتر، نسخهٔ وب و نسخهٔ دسکتاپ یک تاریخچه دارند: یک فایل، که هر بار قبل از نوشتن دوباره خوانده می‌شود، پس اگر هر دو با هم باز باشند هیچ‌کدام کار دیگری را پاک نمی‌کند. اپ اندروید طبعاً روی گوشی است و تاریخچهٔ خودش را همان‌جا نگه می‌دارد.
 
@@ -35,7 +39,9 @@
 
 یک برنامه است با سه پوسته: مرورگر، پنجرهٔ دسکتاپ، و اپ اندروید.
 
-روی ویندوز ساده‌ترین راه `Run.bat` است: منویی می‌آید و بین نسخهٔ وب، نسخهٔ دسکتاپ، اجرای تست‌ها و ساختن APK اندروید انتخاب می‌کنی.
+پیش‌نیازش یک چیز است: **پایتون ۳.۹ یا بالاتر** از [python.org](https://www.python.org/downloads/) — و در نصب ویندوز تیک «Add python.exe to PATH» را بزن، چون همان یک تیک است که بعداً کم می‌آید. اگر پایتون نصب نباشد، `Run.bat` همین را می‌گوید و می‌گوید از کجا بگیری، به‌جای اینکه با `'python' is not recognized` بسته شود. و اگر پکیج‌های نسخهٔ وب نصب نباشند، خودِ برنامه اسم پکیج و دستور نصبش را می‌نویسد — نه یک traceback.
+
+روی ویندوز ساده‌ترین راه `Run.bat` است: منویی می‌آید و بین نسخهٔ وب، نسخهٔ دسکتاپ، اجرای تست‌ها و ساختن APK اندروید انتخاب می‌کنی. (ساختن APK به پایتون کار ندارد؛ Node و JDK می‌خواهد.)
 
 **نسخهٔ وب** یک سرور کوچک روی `127.0.0.1:8000` بالا می‌آورد و مرورگر را باز می‌کند:
 
@@ -129,7 +135,7 @@ web/icon.svg            آیکون برنامه و اپ اندروید
 web/manifest.webmanifest  تا نصب روی گوشی و دسکتاپ ممکن باشد
 
 build-apk.ps1           از clone تا APK نصب‌شدنی، با یک دستور
-android-res/            آیکون لانچر و صفحهٔ شروع — تنها چیزی در android/ که مال ماست
+android-res/            آیکون لانچر، صفحهٔ شروع و استایل شب — تنها چیزی در android/ که مال ماست
 tools/                  ساخت آیکون‌ها از icon.svg و کپی‌شان در پروژهٔ تولیدشده
 package.json            اسکریپت‌های ساخت APK و اجرای تست‌های جاوااسکریپت
 capacitor.config.json   تنظیمات بستهٔ اندروید — web/ را مستقیم داخل APK می‌گذارد
@@ -154,11 +160,13 @@ tests/run_all.py        همهٔ تست‌ها با یک دستور
 python tests/run_all.py
 ```
 
-شش مجموعه، بیش از ۳۴۰ بررسی. مهم‌ترینشان `test_analyzer.mjs` است: یک آرشیو می‌سازد و همان بایت‌ها را به هر دو خوانندهٔ پایتونی و جاوااسکریپتی می‌دهد و خروجی‌ها را مقایسه می‌کند، چون دو پیاده‌سازی از یک الگوریتم بی‌صدا از هم دور می‌شوند.
+شش مجموعه، بیش از ۴۴۰ بررسی. مهم‌ترینشان `test_analyzer.mjs` است: یک آرشیو می‌سازد و همان بایت‌ها را به هر دو خوانندهٔ پایتونی و جاوااسکریپتی می‌دهد و خروجی‌ها را مقایسه می‌کند، چون دو پیاده‌سازی از یک الگوریتم بی‌صدا از هم دور می‌شوند.
 
 نسخهٔ دسکتاپ با یک tkinter تقلبی (`tests/faketk.py`) و نسخهٔ وب با یک DOM تقلبی (`tests/minidom.mjs`) اجرا می‌شوند — هیچ‌کدام Mock نیستند، بلکه پیاده‌سازی واقعی همان بخش کوچکی هستند که برنامه استفاده می‌کند. تفاوتش این است که Mock به هر اسم غلطی جواب می‌دهد، اینها نه. تست‌ها هرگز به تاریخچهٔ واقعی دست نمی‌زنند؛ `tests/sandbox.py` مسیر ذخیره‌سازی را به یک پوشهٔ موقت می‌برد.
 
 `test_android.py` بدون Android SDK اجرا می‌شود و به‌جای build گرفتن، منابع اپ را بررسی می‌کند: پانزده فایل PNG با اندازهٔ درست در پنج تراکم (با یک خوانندهٔ PNG کوچک از `zlib`، تا هیچ وابستگی اضافه لازم نشود)، رنگ آیکون برابر با پالت `web/app.css`، علامت داخل حاشیهٔ امنی که هیچ لانچری نمی‌بُرد، و اینکه هر مسیری که `android/` را دست می‌زند آیکون‌ها را هم کپی می‌کند. دلیل وجودش این است که این‌ها بی‌صدا خراب می‌شوند: اپ ساخته می‌شود، هیچ خطایی نمی‌دهد، و فقط روی گوشی معلوم می‌شود که آیکونش لوگوی Capacitor است.
+
+همین مجموعه سه فایلی را هم که رنگ میز در آن‌ها کپی شده — manifest، متاهای `theme-color` و `capacitor.config.json` — با `web/app.css` می‌سنجد (رنگ روز از بلوک `:root` و رنگ شب از `[data-theme="dark"]`)، و نمی‌گذارد مستندات چیزی را وعده بدهند که در `package.json` نیست؛ متن فارسی ANDROID.md یک‌بار پلاگینی را تبلیغ می‌کرد که هرگز نصب نشده بود.
 
 اگر Node نصب نباشد، چهار مجموعهٔ پایتونی اجرا می‌شوند و در خلاصه صریح نوشته می‌شود که دو تای دیگر اجرا نشده‌اند — نه اینکه کار نیمه‌تمام موفق گزارش شود. برای اجرای فقط بخش جاوااسکریپت: `npm test`.
 
@@ -169,15 +177,20 @@ python tests/run_all.py
 Request your archive from X (`Settings and privacy` → `Your account` → `Download an archive of your data`), then hand the ZIP to whichever version you prefer. Do not unzip it.
 
 ```bash
+# Python 3.9 or newer. On Windows, tick "Add python.exe to PATH" in the installer.
 pip install -r requirements.txt   # fastapi + uvicorn, needed by the web version
 python x_analyzer_server.py       # web:     http://127.0.0.1:8000
 python x_follow_analyzer.py       # desktop: nothing but Python (openpyxl if you export)
-python tests/run_all.py           # all six suites, 340 checks
+python tests/run_all.py           # all six suites, over 440 checks
 ```
 
 On Windows, `Run.bat` offers all four of these as a menu, the last being `powershell -ExecutionPolicy Bypass -File build-apk.ps1`, which takes a fresh clone all the way to `dist\follow-desk-debug.apk` — finding a JDK, finding or installing the Android SDK, and writing the `local.properties` Gradle wants. [ANDROID.md](ANDROID.md) covers the manual route and every error either path can produce. The desktop version also exports the list to `.xlsx`; that button is the only thing in the project that wants `openpyxl`, and it tells you the install command rather than crashing if it is missing.
 
+Both ways of getting it wrong are answered in words rather than in a stack trace. Run the web version before installing its packages and it names the missing one and prints the command that fixes it, then points at the desktop version, which needs nothing but Python. Run `Run.bat` on a computer with no Python at all and it says so, and where to get it, instead of flashing `'python' is not recognized` and closing.
+
 The interface is a triage desk rather than a dashboard. One account occupies the card at the centre; `Enter` (or `O`) opens the profile in a new tab and records it as handled so it never comes back, `Space` (or `S`) sends it to the back of the queue without recording anything, `U` undoes the last decision, `B` opens the next batch of 5, 10, 20 or 50, and `1` `2` `3` switch between the queue, the full list and everything you have already dealt with. None of them fire while you are typing in the search box. The desktop version adds `→` for next, `T` for the theme, `Ctrl+O` to pick an archive and `Esc` to dismiss a message. The counter above the card drains as you work; totals live in a thin rail where they cannot compete with the decision in front of you.
+
+On first launch a welcome card explains what the X archive is and where to request it; once dismissed it stays away until you erase history. Language and theme follow the browser defaults, and the buttons in the header let you override them. Come back later and the same card names the last archive you read — the file's name, size and date, nothing from the follow list itself. A browser cannot reopen a file from its path, so that is a reminder rather than a shortcut: pick the same ZIP again, and watch a progress bar whose numbers come from the ZIP reader instead of an animation, which is the difference between waiting and wondering on a multi-gigabyte archive.
 
 Everything happens on your device. The ZIP is inflated in the page itself, so nothing is uploaded — `/api/analyze` exists only as a fallback for browsers without `DecompressionStream`. Your review history is stored in the per-user application-data directory (never in the project folder, where a careless `git add -f` would publish it), written atomically, and shared by the web and desktop versions on the same computer; the Android build keeps its own history on the phone. Set `XFA_HISTORY_DIR` to relocate it.
 

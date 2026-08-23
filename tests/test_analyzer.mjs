@@ -272,6 +272,31 @@ check('archive has 42 entries', zip.entries.length === 42);
 const relevant = zip.entries.filter(e => ['data/following.js', 'data/follower.js'].includes(e.name));
 check('only 2 are recognised as needed', relevant.length === 2);
 
+console.log('\n[9] Progress is measured, not guessed');
+// The busy screen used to be three blinking dots for what can be a multi-gigabyte read.
+// The numbers behind the bar have to come from the reader: a bar that goes backwards, or
+// stops short, or arrives before the work does, is worse than no bar at all.
+const fractions = [];
+const phases = new Set();
+const wide = buildZip([
+  { name: 'data/following.js', data: ytd('following', Array.from({ length: 400 }, (_, i) => entry('following', String(3000 + i)))) },
+  { name: 'data/follower.js', data: ytd('follower', Array.from({ length: 200 }, (_, i) => entry('follower', String(3000 + i)))), store: true },
+  ...Array.from({ length: 30 }, (_, i) => ({ name: `data/media_${i}.js`, data: 'x'.repeat(20000) })),
+]);
+await analyzeArchive(wide, {
+  onProgress: (p) => { fractions.push(p.fraction); phases.add(p.phase); },
+});
+check('progress is reported more than once', fractions.length >= 3);
+check('both passes report: the directory scan and the read',
+      phases.has('directory') && phases.has('read'));
+check('every fraction is a number between 0 and 1',
+      fractions.every((f) => typeof f === 'number' && f >= 0 && f <= 1));
+check('the bar never goes backwards between the two passes',
+      fractions.every((f, i) => i === 0 || f >= fractions[i - 1]));
+check('the scan does not fill the bar before the read begins',
+      Math.max(...fractions.filter((_, i) => i < fractions.length - 1)) < 1);
+check('it arrives at 1 exactly when the work is done', fractions.at(-1) === 1);
+
 // Left beside the fixture for eyeballing when a parity check fails.
 if (jsResult) writeFileSync(join(SCRATCH, 'js_parity.json'), JSON.stringify(jsResult, null, 2));
 const tail = skipped ? `, ${skipped} section(s) skipped` : '';

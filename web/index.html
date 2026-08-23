@@ -12,7 +12,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
-<meta name="theme-color" content="#BAC5BF">
+<meta name="theme-color" content="#BAC5BF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#171D1B" media="(prefers-color-scheme: dark)">
 <title>میز تریاژ فالو</title>
 <link rel="stylesheet" href="app.css">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -23,13 +24,22 @@
 <script>
   // Applied before first paint so the desk never flashes the wrong colour.
   try {
-    var saved = localStorage.getItem('theme');
-    var dark = saved ? saved === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
-    document.documentElement.dataset.theme = dark ? 'dark' : 'light';
-    var lang = localStorage.getItem('lang') === 'en' ? 'en' : 'fa';
+    var theme = localStorage.getItem('theme');
+    if (theme !== 'light' && theme !== 'dark' && theme !== 'system') theme = 'system';
+    var prefersDark = matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.dataset.theme = theme === 'dark' || (theme === 'system' && prefersDark) ? 'dark' : 'light';
+    document.documentElement.dataset.themeMode = theme;
+
+    var lang = localStorage.getItem('lang');
+    if (lang !== 'en' && lang !== 'fa') {
+      lang = (navigator.language || '').toLowerCase().startsWith('fa') ? 'fa' : 'en';
+    }
     document.documentElement.lang = lang;
     document.documentElement.dir = lang === 'fa' ? 'rtl' : 'ltr';
-  } catch (e) { document.documentElement.dataset.theme = 'light'; }
+  } catch (e) {
+    document.documentElement.dataset.theme = 'light';
+    document.documentElement.dataset.themeMode = 'system';
+  }
 </script>
 </head>
 <body>
@@ -47,12 +57,13 @@
 
   <div class="masthead__tools">
     <span class="whoami" id="whoami" hidden></span>
-    <label class="btn btn--quiet file-btn">
+    <label class="btn btn--quiet file-btn" id="file-btn">
       <span data-t="chooseFile">انتخاب آرشیو</span>
       <input type="file" id="file" accept=".zip,application/zip" hidden>
     </label>
-    <button type="button" class="btn btn--icon" id="lang" title="fa / en"><span id="lang-label">EN</span></button>
-    <button type="button" class="btn btn--icon" id="theme" data-t-title="toggleTheme" title="تغییر روشنایی">
+    <button type="button" class="btn btn--icon" id="lang" data-t-title="switchLang" title="تغییر زبان"><span id="lang-label">EN</span></button>
+    <button type="button" class="btn btn--icon" id="welcome-help" data-t-title="welcomeHelp" title="راهنما" aria-label="راهنما">?</button>
+    <button type="button" class="btn btn--icon" id="theme" aria-label="تغییر روشنایی" title="تغییر روشنایی">
       <span id="theme-glyph" aria-hidden="true">◐</span>
     </button>
   </div>
@@ -85,7 +96,7 @@
 
     <details class="skipped" id="skipped" hidden>
       <summary><span id="skipped-count">0</span> <span data-t="skippedFiles">فایل نادیده‌گرفته‌شده</span></summary>
-      <p class="skipped__why" data-t="skippedWhy">این فایل‌ها نام مشابه دارند ولی فهرست فالوور نیستند، پس شمرده نشدند.</p>
+      <p class="skipped__why" data-t="skippedWhy">این فایل‌ها نامی شبیه فهرست فالوور دارند ولی فهرست فالوور نیستند، پس در شمارش نیامدند.</p>
       <ul id="skipped-list"></ul>
     </details>
 
@@ -115,16 +126,31 @@
       <button type="button" class="view" data-view="done"><span data-t="viewDone">رسیدگی‌شده</span><kbd>3</kbd></button>
     </nav>
 
+    <!-- A one-time readiness check. Dismissed state is tied to the review history:
+         erasing history brings the welcome card back. -->
+    <div class="welcome" id="welcome" hidden>
+      <div class="welcome__copy">
+        <p class="eyebrow" data-t="welcomeEyebrow">خوش آمدی</p>
+        <h2 class="welcome__lead" data-t="welcomeLead">میز تریاژ فالو</h2>
+        <p class="welcome__body" id="welcome-body"></p>
+      </div>
+      <div class="welcome__actions">
+        <button type="button" class="btn btn--quiet welcome__check" id="welcome-check" data-t="welcomeCheck">بررسی کن</button>
+        <button type="button" class="btn btn--primary welcome__dismiss" id="welcome-dismiss" data-t="welcomeDismiss">متوجه شدم</button>
+      </div>
+    </div>
+
     <!-- start / loading / error all live on a blank docket, so the desk is never empty -->
     <div class="deck deck--intro" id="intro">
       <div class="card card--blank" id="dropzone">
         <p class="card__eyebrow eyebrow" data-t="introEyebrow">پروندهٔ جدید</p>
         <h1 class="card__lead" data-t="introLead">آرشیو X را روی میز بگذار</h1>
-        <p class="card__note" data-t="introNote">فایل zip همان چیزی است که از Settings → Your account → Download an archive می‌گیری. خواندنش کامل داخل همین صفحه انجام می‌شود.</p>
-        <label class="btn btn--primary">
+        <p class="card__note" data-t="introNote">فایل zip را از Settings → Your account → Download an archive بگیر، بعد انتخابش کن یا بکش اینجا. خواندنش کامل داخل همین صفحه انجام می‌شود.</p>
+        <label class="btn btn--primary" id="file2-btn">
           <span data-t="chooseFile">انتخاب آرشیو</span>
           <input type="file" id="file2" accept=".zip,application/zip" hidden>
         </label>
+        <p class="card__hint" id="last-archive"></p>
         <p class="card__hint" data-t="introDrop">یا فایل را همین‌جا رها کن</p>
       </div>
     </div>
@@ -133,7 +159,8 @@
       <div class="card card--blank">
         <p class="card__eyebrow eyebrow" data-t="busyEyebrow">در حال خواندن</p>
         <h2 class="card__lead" id="busy-lead" data-t="busyLead">آرشیو باز می‌شود…</h2>
-        <p class="card__note" id="busy-note" data-t="busyNote">فقط فایل‌های فالوور و فالویینگ از حجم استخراج می‌شوند، پس آرشیو چند گیگابایتی هم سریع است.</p>
+        <p class="card__note" id="busy-note" data-t="busyNote">فقط فایل‌های فالوور و فالویینگ از دل آرشیو استخراج می‌شوند، پس آرشیو چندگیگابایتی هم سریع خوانده می‌شود.</p>
+        <div class="spool busy__spool" aria-hidden="true"><span class="spool__fill" id="busy-spool"></span></div>
         <div class="ticker" aria-hidden="true"><span></span><span></span><span></span></div>
       </div>
     </div>
@@ -160,13 +187,16 @@
             <span data-t="skip">بعدی</span>
             <kbd>Space</kbd>
           </button>
+          <button type="button" class="btn btn--quiet btn--native-batch" id="act-batch-native" hidden>
+            <span id="batch-native-label" data-t="batchOpenNative">باز کردن ۱۰ تای بعدی</span>
+          </button>
         </div>
       </article>
 
       <div class="card card--empty" id="card-empty" hidden>
         <p class="card__eyebrow eyebrow" data-t="emptyEyebrow">صف تمام شد</p>
         <h2 class="card__lead" id="empty-lead" data-t="emptyLead">همه را رسیدگی کردی</h2>
-        <p class="card__note" data-t="emptyNote">می‌توانی رسیدگی‌شده‌ها را ببینی، یا آرشیو تازه‌ای بگذاری تا از اول شمرده شود.</p>
+        <p class="card__note" data-t="emptyNote">می‌توانی رسیدگی‌شده‌ها را ببینی، یا آرشیو تازه‌ای بگذاری تا از نو شمرده شود.</p>
         <button type="button" class="btn btn--quiet" id="empty-see" data-t="viewDone">رسیدگی‌شده</button>
       </div>
     </div>
@@ -219,7 +249,18 @@
 
 <div class="notice" id="notice" role="alert" hidden>
   <p id="notice-text"></p>
-  <button type="button" class="notice__x" id="notice-x" aria-label="بستن">×</button>
+  <button type="button" class="notice__x" id="notice-x" data-t-aria-label="close" aria-label="بستن">×</button>
+</div>
+
+<div class="confirm" id="confirm" role="dialog" aria-modal="true" hidden>
+  <div class="confirm__card">
+    <h2 class="confirm__title" id="confirm-title"></h2>
+    <p class="confirm__body" id="confirm-body"></p>
+    <div class="confirm__actions">
+      <button type="button" class="btn btn--primary" id="confirm-cancel"></button>
+      <button type="button" class="btn" id="confirm-action"></button>
+    </div>
+  </div>
 </div>
 
 <script type="module" src="app.js"></script>
