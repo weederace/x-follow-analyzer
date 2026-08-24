@@ -35,6 +35,12 @@
   --step: 0.75rem;
   --radius: 3px;         /* a paper corner, not a pill */
   --card-w: 27rem;
+
+  /* The fixed decision bar's own height: one 44dp button plus its 0.75rem top and bottom
+     padding. Both the bar and the toast below it derive from this, so a taller button can
+     never leave the toast sitting on the buttons the way it used to. The safe-area inset
+     is added where each is placed, not baked in here. */
+  --reach-bar: calc(44px + 1.5rem);
 }
 
 [data-theme="dark"] {
@@ -51,6 +57,27 @@
 
 * { box-sizing: border-box; }
 
+/* The `hidden` attribute is how app.js shows and hides every panel on this page, so it has to
+   actually win. The browser's own rule is `[hidden] { display: none }` — but that lives in the
+   user-agent origin, and *any* author declaration beats the user agent on origin alone, no
+   matter how weak its selector. So a plain `.notice { display: flex }` silently made
+   `notice.hidden = true` do nothing, and the same was true of .keys, .split, .tally, .undertray
+   and .views: six panels the code believed it could hide and could not. (.sheet is not one of
+   them, however much it looks like it — it sets no display of its own. A first pass counted it
+   by matching `.sheet` as a substring of `.sheet__head`, which is why section [27] resolves
+   selectors against real elements instead of searching the stylesheet for names.)
+
+   `!important` is the fix rather than six more `.x[hidden]` overrides, because the overrides
+   are the thing that failed — three of them existed and the next six panels were simply
+   forgotten. An important declaration outranks every normal one in this file regardless of
+   specificity or source order, so the guarantee holds for panels not written yet. Nothing here
+   ever needs to give a hidden element a box: `hidden` means the element is not relevant.
+
+   Worth knowing why no test caught it: the fake DOM in tests/ runs no cascade, so it reports
+   `.hidden === true` and passes while a real browser still paints the element. Section [27] of
+   tests/test_frontend.mjs cross-references the two files instead of trusting the shim. */
+[hidden] { display: none !important; }
+
 html, body { height: 100%; }
 
 body {
@@ -65,7 +92,15 @@ body {
     linear-gradient(color-mix(in srgb, var(--ink) 4%, transparent) 1px, transparent 1px),
     linear-gradient(90deg, color-mix(in srgb, var(--ink) 4%, transparent) 1px, transparent 1px);
   background-size: 28px 28px, 28px 28px;
-  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  /* Safe-area rule for the whole stylesheet, because getting this wrong is invisible on a
+     desktop and obvious on a phone: the body owns the left, right and bottom insets, and
+     anything in normal flow therefore must not add them again. Only an element taken out of
+     flow may — fixed boxes resolve against the viewport and so escape this padding, and the
+     sticky masthead below deliberately reaches up into the status bar. The top inset is not
+     here on purpose: the masthead is sticky, and sticky clamps to the scrollport rather than
+     to this padding box, so padding the body would have spaced the header correctly at rest
+     and then let it slide under the status bar the moment you scrolled. */
+  padding: 0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
 .sr-only {
@@ -99,26 +134,46 @@ body {
   padding: 0.5rem 0.85rem; cursor: pointer;
   transition: background 120ms ease, border-color 120ms ease, transform 80ms ease;
   min-height: 44px;
+  /* Touch hygiene, and it matters most in the Android WebView. The grey flash on tap is
+     the browser's, not ours, and it lands a beat after the press so it reads as lag.
+     manipulation drops the double-tap-zoom wait without disabling pinch. And a label
+     that can be text-selected turns a slightly long press on "Next" into a selection
+     handle instead of a decision. */
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
 }
-.btn:hover { background: color-mix(in srgb, var(--ink) 6%, transparent); }
-.btn:active { transform: translateY(1px); }
+/* Hover is a pointer state, and a touch screen has no way to leave it: tap a button in a
+   WebView and :hover sticks until you tap something else, so the last thing you pressed
+   stays lit. Gating every hover rule on a device that can actually hover is what stops
+   the app looking like a web page in a frame. */
+@media (hover: hover) {
+  .btn:hover { background: color-mix(in srgb, var(--ink) 6%, transparent); }
+  .btn[disabled]:hover { background: transparent; }
+  .btn--primary:hover { background: color-mix(in srgb, var(--pine) 88%, var(--ink)); }
+  .btn--ghost:hover { color: var(--ink); }
+  .btn--danger-quiet:hover { background: transparent; text-decoration: underline; }
+}
+/* What replaces it on a finger: the press itself. Both properties change on the same
+   frame as the touch, so the button acknowledges the tap even when the work behind it
+   takes a moment. */
+.btn:active { transform: translateY(1px); background: color-mix(in srgb, var(--ink) 12%, transparent); }
+.btn--primary:active { background: color-mix(in srgb, var(--pine) 82%, var(--ink)); }
 .btn:focus-visible { outline: 2px solid var(--pine); outline-offset: 2px; }
 .btn[disabled] { opacity: 0.4; cursor: default; }
-.btn[disabled]:hover { background: transparent; }
+.btn[disabled]:active { transform: none; background: transparent; }
 
 .btn--primary {
   background: var(--pine); color: var(--card); border-color: var(--pine);
   padding-inline: 1.1rem;
 }
 [data-theme="dark"] .btn--primary { color: #101514; }
-.btn--primary:hover { background: color-mix(in srgb, var(--pine) 88%, var(--ink)); }
 
 .btn--quiet { background: color-mix(in srgb, var(--card) 70%, transparent); }
 .btn--ghost { border-color: transparent; color: var(--pencil); }
-.btn--ghost:hover { color: var(--ink); }
 .btn--icon { padding: 0.4rem 0.6rem; min-width: 2.5rem; justify-content: center; }
 .btn--danger-quiet { border-color: transparent; color: var(--stamp); padding-inline: 0; }
-.btn--danger-quiet:hover { background: transparent; text-decoration: underline; }
 
 .file-btn { position: relative; }
 
@@ -132,7 +187,12 @@ kbd {
 /* ── masthead ──────────────────────────────────────────────────────────────── */
 .masthead {
   display: flex; align-items: center; justify-content: space-between; gap: var(--step);
-  padding: 0.85rem clamp(0.85rem, 3vw, 2rem);
+  /* The top inset lives here, added to the resting padding, so the bar's background fills
+     the status-bar strip and the content sits below it. Sticky clamps to top: 0 — the true
+     scrollport top under viewport-fit=cover — so the painted bar stays behind the status
+     bar on scroll instead of the content sliding beneath it. On a desktop the inset is 0
+     and this is just 0.85rem. */
+  padding: calc(0.85rem + env(safe-area-inset-top)) clamp(0.85rem, 3vw, 2rem) 0.85rem;
   border-bottom: 1px solid var(--rule);
   background: color-mix(in srgb, var(--desk) 82%, var(--card));
   position: sticky; top: 0; z-index: 20;
@@ -213,8 +273,14 @@ kbd {
   background: transparent; border: 0; border-radius: 2px; padding: 0.35rem 0.85rem; cursor: pointer;
   display: flex; align-items: center; gap: 0.4rem;      /* label, then its number hint */
   min-height: 44px;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
 }
-.view:hover { color: var(--ink); }
+@media (hover: hover) {
+  .view:hover { color: var(--ink); }
+}
 .view:focus-visible { outline: 2px solid var(--pine); outline-offset: 1px; }
 .view.is-on { background: var(--card); color: var(--ink); box-shadow: var(--lift-1); }
 
@@ -239,10 +305,19 @@ kbd {
 .card--ghost[data-depth="1"] { transform: translateY(6px) rotate(0.5deg); z-index: 3; }
 .card--ghost[data-depth="2"] { transform: translateY(12px) rotate(-0.6deg); z-index: 2; }
 .card--ghost[data-depth="3"] { transform: translateY(18px) rotate(0.35deg); z-index: 1; }
-.card--ghost[hidden] { display: none; }
+/* hiding is central now: see `[hidden] { display: none !important }` near the top */
 
 .card--live, .card--empty, .card--blank { position: relative; z-index: 4; }
 .card--live:focus-visible { outline: 2px solid var(--pine); outline-offset: 3px; }
+/* Brushing the card aside is the phone's Space bar. `pan-y` is what makes it safe: the
+   browser keeps ownership of vertical scrolling and only horizontal travel is ever handed to
+   the gesture, so a thumb flicking down the page never drags a decision with it. */
+.card--live { touch-action: pan-y; }
+/* While a finger is on the card it must track the finger exactly — a transition here would
+   make the paper lag behind the hand, which is the whole difference between dragging an
+   object and watching an animation of one. The transition belongs to the release. */
+.card--live.is-dragging { transition: none; }
+.card--live.is-settling { transition: transform 240ms cubic-bezier(0.2, 0.9, 0.2, 1), opacity 240ms ease; }
 
 .card__eyebrow { margin-bottom: 0.75rem; }
 .card__handle {
@@ -276,8 +351,14 @@ kbd {
 }
 /* Two classes, not one. The narrow-screen block near the end of this file sets .card's
    padding shorthand, and at equal specificity the later rule wins — which would reset
-   this to 1.1rem and let the fixed bar sit on top of the card's own content. */
-.card.card--live { padding-bottom: 5rem; }
+   this to 1.1rem and let the fixed bar sit on top of the card's own content. The value is
+   derived rather than typed: --reach-bar is the bar's own height, so if the bar ever grows
+   a row this clearance and the toast's offset both follow it without being touched.
+   No safe-area inset here, unlike the toast: the card is in normal flow, so the body's
+   bottom padding has already lifted it clear of the home bar, and the fixed bar's own inset
+   padding sits inside that same strip. Adding it again opened a visible gap under the card
+   on a phone with a gesture bar. */
+.card.card--live { padding-bottom: calc(var(--reach-bar) + 1rem); }
 
 @media (min-width: 30.0625rem) and (min-height: 36.0625rem) {
   :root:not([data-native="true"]) .card--live .card__actions {
@@ -290,6 +371,12 @@ kbd {
     box-shadow: none;
   }
   :root:not([data-native="true"]) .card.card--live { padding-bottom: 1.25rem; }
+  /* And with the bar back in the flow, the page no longer has to keep a bar's height of empty
+     desk under the rail for a bar that is not hovering over it. */
+  :root:not([data-native="true"]) .desk { padding-bottom: 4rem; }
+  /* The bar is back inside the card here, so nothing is covering the bottom edge and the
+     toast can return to the corner it belongs in. */
+  :root:not([data-native="true"]) .notice { bottom: 1rem; }
 }
 
 .card--blank { border-style: dashed; border-color: color-mix(in srgb, var(--ink) 22%, transparent); box-shadow: none; }
@@ -309,7 +396,6 @@ kbd {
 .welcome__body { margin: 0; font-size: 0.875rem; color: var(--pencil); line-height: 1.5; }
 .welcome__actions { display: flex; flex-direction: column; gap: 0.5rem; flex-shrink: 0; align-self: center; }
 .welcome__actions .btn { justify-content: center; }
-.welcome[hidden] { display: none; }
 
 /* The one saturated moment in the app. */
 .stamp {
@@ -357,6 +443,25 @@ kbd {
 
 .keys { display: flex; flex-wrap: wrap; gap: 0.4rem 1rem; margin: 0; font-size: 0.75rem; color: var(--pencil); align-items: center; justify-content: center; }
 
+/* A note pencilled in the margin, not a tooltip: same pencil grey as the keyboard row it
+   replaces, and it sits in the same slot so the page does not reflow between the two. */
+.hint {
+  display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+  margin: 0; font-size: 0.8125rem; color: var(--pencil);
+}
+.hint__mark {
+  font-size: 1rem; line-height: 1;
+  color: var(--pine);
+  /* The mark drifts the way the finger should, which is what a still line cannot say. Not
+     exempted for reduced motion here: the blanket reset at the end of this file already flattens
+     every animation with `!important`, so a local `animation: none` could never be the winner. */
+  animation: hint-drift 3.2s ease-in-out infinite;
+}
+@keyframes hint-drift {
+  0%, 100% { transform: translateX(-0.2rem); }
+  50%      { transform: translateX(0.2rem); }
+}
+
 /* ── reference sheet (full list / cleared) ─────────────────────────────────── */
 .sheet {
   width: 100%;
@@ -384,19 +489,33 @@ kbd {
 :root[lang="en"] .rows th { letter-spacing: 0.14em; text-transform: uppercase; }
 .rows td { padding: 0.5rem 1rem; border-bottom: 1px solid color-mix(in srgb, var(--ink) 7%, transparent); vertical-align: middle; }
 .rows tr:last-child td { border-bottom: 0; }
-.rows tbody tr:hover { background: color-mix(in srgb, var(--ink) 4%, transparent); }
+/* Hover feedback is for a pointer. On a touch screen the state sticks after a tap and reads
+   as a row selecting itself, so it is gated with the buttons above. */
+@media (hover: hover) {
+  .rows tbody tr:hover { background: color-mix(in srgb, var(--ink) 4%, transparent); }
+}
 .rows .cell-handle { font-family: var(--data); direction: ltr; }
 .rows .cell-id { font-family: var(--data); font-variant-numeric: tabular-nums; color: var(--pencil); direction: ltr; }
 .rows .cell-act { text-align: end; white-space: nowrap; }
 .rows .is-done .cell-handle { color: var(--pencil); }
 .sheet__more { margin: 0; padding: 0.75rem 1rem; font-size: 0.8125rem; color: var(--pencil); border-top: 1px solid var(--rule); }
-.row-btn { font: inherit; font-size: 0.8125rem; font-weight: 600; color: var(--pine); background: none; border: 0; padding: 0.2rem 0.3rem; cursor: pointer; border-radius: 2px; min-height: 44px; min-width: 44px; }
-.row-btn:hover { text-decoration: underline; }
+.row-btn { font: inherit; font-size: 0.8125rem; font-weight: 600; color: var(--pine); background: none; border: 0; padding: 0.2rem 0.3rem; cursor: pointer; border-radius: 2px; min-height: 44px; min-width: 44px; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+@media (hover: hover) {
+  .row-btn:hover { text-decoration: underline; }
+}
+.row-btn:active { text-decoration: underline; }
 .row-btn:focus-visible { outline: 2px solid var(--pine); outline-offset: 1px; }
 
 /* ── notice ────────────────────────────────────────────────────────────────── */
 .notice {
-  position: fixed; inset-inline: 1rem; bottom: 1rem; z-index: 30;
+  position: fixed; inset-inline: 1rem;
+  /* Mobile-first, the decision bar is fixed to the bottom edge, so a toast has to clear
+     it or it lands on the very buttons it is telling you about — which is exactly what a
+     "pop-up blocked" message did on the phone. Sits one --reach-bar plus the safe area
+     above the edge. On a roomy non-touch window the bar is static and the rule below
+     drops this back into the corner. */
+  bottom: calc(var(--reach-bar) + env(safe-area-inset-bottom) + 1rem);
+  z-index: 31;   /* one above the decision bar (30), never painted behind it */
   max-width: 34rem; margin-inline: auto;
   display: flex; align-items: flex-start; gap: 0.75rem;
   padding: 0.85rem 1rem;
@@ -415,7 +534,6 @@ kbd {
   background: color-mix(in srgb, var(--ink) 28%, transparent);
   padding: 1rem;
 }
-.confirm[hidden] { display: none; }
 .confirm__card {
   width: min(24rem, 100%);
   background: var(--card);
@@ -428,7 +546,10 @@ kbd {
 .confirm__actions { display: flex; justify-content: flex-end; gap: 0.6rem; flex-wrap: wrap; }
 .confirm__actions .btn { min-height: 44px; }
 .btn--danger { border-color: transparent; color: var(--stamp); background: color-mix(in srgb, var(--stamp) 10%, transparent); }
-.btn--danger:hover { background: color-mix(in srgb, var(--stamp) 16%, transparent); }
+@media (hover: hover) {
+  .btn--danger:hover { background: color-mix(in srgb, var(--stamp) 16%, transparent); }
+}
+.btn--danger:active { background: color-mix(in srgb, var(--stamp) 22%, transparent); }
 
 /* ── the Android build ─────────────────────────────────────────────────────────
    Set by app.js when Capacitor is present. On a phone window.open hands the URL to the
@@ -444,17 +565,52 @@ kbd {
 :root[data-native="true"] .card__actions .btn { padding-block: 0.7rem; }
 :root[data-native="true"] .btn--native-batch { display: inline-flex; }
 :root[data-native="true"] .batch__size select { padding: 0.5rem 0.6rem; }
-:root[data-native="true"] .masthead { padding-top: max(0.85rem, env(safe-area-inset-top)); }
-:root[data-native="true"] .notice { bottom: max(1rem, env(safe-area-inset-bottom)); }
+/* There is deliberately no `.masthead` inset rule here either. The base rule adds the top
+   inset in every build, because a notch is a property of the screen and not of Capacitor —
+   the browser on the same phone has the same cutout. This block used to add it a second
+   time on top of a body that was also padding for it, which spaced the header twice. */
+/* There is deliberately no `.notice` rule here. There used to be one, pinning the toast to
+   `max(1rem, env(safe-area-inset-bottom))`, and because it was more specific than the base
+   rule it won on the phone — which is the one place the decision bar is always fixed to the
+   bottom edge, so the toast landed squarely on the two buttons it was talking about. The
+   base rule already adds the safe-area inset on top of the bar's height, so the phone needs
+   nothing extra. Do not reintroduce a bottom offset for native without adding --reach-bar
+   to it. */
 
 .btn--native-batch { display: none; }
 
 /* ── narrow screens: the rail moves under the work, never above it ─────────── */
 @media (max-width: 56rem) {
-  .desk { grid-template-columns: minmax(0, 1fr); }
-  .rail { position: static; order: 2; }
+  .desk {
+    grid-template-columns: minmax(0, 1fr);
+    /* The decision bar is fixed to the bottom edge at these widths, so the last thing on the
+       page — the erase-history button — sat underneath it. Reserve the bar's own height
+       instead of the 4rem guess, which was shorter than the bar it had to clear. */
+    padding-bottom: calc(var(--reach-bar) + 2rem);
+  }
   .stage { order: 1; }
-  .rail .figures { grid-template-columns: 1fr 1fr; gap: 0.55rem 1.25rem; }
+  /* The rail stops being a pinned panel and becomes a ledger strip ruled onto the desk.
+     Beside the card, its slab reads as a margin note; stacked underneath, the very same slab
+     reads as a second card — and there is only ever one piece of paper on this desk. */
+  .rail {
+    position: static; order: 2;
+    gap: 1.25rem;
+    padding: 1.4rem 0 0;
+    background: none;
+    border: 0; border-top: 1px solid var(--rule); border-radius: 0;
+  }
+  /* One row of four, hairline-ruled like the totals on a receipt, and it stays one row at
+     every phone width. Two columns collapsing to one turned four short figures into four
+     near-empty rows and pushed the foot of the rail below the fold to say nothing more. */
+  .rail .figures { grid-template-columns: repeat(4, 1fr); gap: 0; }
+  .rail .figure {
+    flex-direction: column; align-items: center; gap: 0.2rem;
+    text-align: center; padding: 0.1rem 0.35rem;
+    border-inline-start: 1px solid var(--rule);
+  }
+  .rail .figure:first-child { border-inline-start: 0; }
+  .rail .figure dt { font-size: 0.75rem; line-height: 1.3; }
+  .rail .figure dd { font-size: 1.25rem; }
 }
 
 @media (max-width: 30rem) {
@@ -463,7 +619,6 @@ kbd {
   .card { padding: 1.25rem 1.15rem 1.1rem; }
   .card__actions .btn { flex: 1 1 auto; justify-content: center; }
   .stamp { top: 3.75rem; }
-  .rail .figures { grid-template-columns: 1fr; }
   .welcome { flex-direction: column; }
   .welcome__actions { flex-direction: row; align-self: stretch; }
   .welcome__actions .btn { flex: 1 1 auto; }

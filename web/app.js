@@ -76,6 +76,7 @@ const WORDS = {
     cardNoHandle: 'این آرشیو یوزرنیم را نگه نداشته؛ پروفایل با آیدی باز می‌شود.',
     openAndRecord: 'باز کردن و ثبت',
     skip: 'بعدی',
+    swipeHint: 'کارت را به هر طرف بکش تا بعدی بیاید',
     stamped: 'ثبت شد',
     undo: 'برگرداندن',
     batchSize: 'تعداد',
@@ -168,6 +169,7 @@ const WORDS = {
     cardNoHandle: 'This archive kept no username, so the profile opens by ID.',
     openAndRecord: 'Open and record',
     skip: 'Next',
+    swipeHint: 'Drag the card either way for the next one',
     stamped: 'Recorded',
     undo: 'Undo',
     batchSize: 'How many',
@@ -214,6 +216,7 @@ const history = createHistory();
 let lang = document.documentElement.lang === 'en' ? 'en' : 'fa';
 let themeMode = document.documentElement.dataset.themeMode || 'system';
 let welcomeDismissed = false;
+let swipeLearned = false;
 let oneWay = [];        // every account in this archive that does not follow back
 let queue = [];         // the ones still to decide on, in working order
 let view = 'queue';
@@ -235,6 +238,10 @@ const ROW_CAP = 400;
  */
 const NATIVE = typeof globalThis.Capacitor !== 'undefined';
 if (NATIVE) document.documentElement.dataset.native = 'true';
+// The card gesture ignores a mouse, so the hint that advertises it belongs only where a finger
+// is the primary input. NATIVE first because the APK's WebView is a phone by definition; the
+// media query is what catches a phone browser, which the [data-native] flag never sees.
+const TOUCH = NATIVE || (typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches);
 
 // ---------------------------------------------------------------------------
 // Chrome: language, theme, notices
@@ -446,6 +453,7 @@ function paintCard() {
   card.hidden = !person;
   empty.hidden = Boolean(person);
   el('act-batch').disabled = !person;
+  paintHint();          // after card.hidden, because the note reads it
 
   // The stack behind the card is the work left, so show only as much as is real.
   document.querySelectorAll('.card--ghost').forEach((ghost) => {
@@ -542,9 +550,12 @@ function setView(next) {
   const onQueue = next === 'queue';
   el('deck').hidden = !onQueue;
   el('undertray').hidden = !onQueue;
-  el('keys').hidden = !onQueue || NATIVE;
+  // TOUCH, not NATIVE: a phone browser has no Enter to press either, and it was still being
+  // shown a row of keys. The two rows are counterparts, so exactly one of them ever speaks.
+  el('keys').hidden = !onQueue || TOUCH;
   el('sheet').hidden = onQueue;
   if (!onQueue) paintSheet();
+  paintHint();          // after deck.hidden: the note goes with the deck when the view changes
 }
 
 function paintSheet() {
@@ -701,6 +712,33 @@ function isWelcomeDismissed() {
   try { return localStorage.getItem('welcomeDismissed') === 'true'; } catch { return false; }
 }
 
+function isSwipeLearned() {
+  if (swipeLearned) return true;
+  try { return localStorage.getItem('swipeLearned') === 'true'; } catch { return false; }
+}
+
+/** One successful brush is the whole lesson, so the note comes down and stays down. */
+function learnSwipe() {
+  if (swipeLearned) return;
+  swipeLearned = true;
+  // Deliberately not cleared by "forget everything": that erases decisions and re-runs the
+  // capability probe, but nobody unlearns a gesture by clearing their history.
+  try { localStorage.setItem('swipeLearned', 'true'); } catch { /* blocked */ }
+  paintHint();
+}
+
+/**
+ * Derived, never told. The note is only true when a live card is actually on the desk, so it
+ * reads that from the card and the deck instead of trusting each caller to remember — the same
+ * mistake as the per-element `[hidden]` guards, where three call sites existed and six were
+ * forgotten.
+ */
+function paintHint() {
+  const hint = el('hint');
+  if (!hint) return;
+  hint.hidden = !TOUCH || isSwipeLearned() || el('card').hidden || el('deck').hidden;
+}
+
 function dismissWelcome() {
   welcomeDismissed = true;
   try { localStorage.setItem('welcomeDismissed', 'true'); } catch { /* blocked */ }
@@ -750,6 +788,7 @@ function showStage(which) {
   el('views').hidden = !working;
   if (working) setView('queue');
   else { el('deck').hidden = true; el('undertray').hidden = true; el('keys').hidden = true; el('sheet').hidden = true; }
+  paintHint();
   paintWelcome();
 }
 
@@ -940,6 +979,97 @@ el('act-batch-native')?.addEventListener('click', openBatch);
 el('act-undo').addEventListener('click', undoLast);
 el('empty-see').addEventListener('click', () => setView('done'));
 
+/**
+ * Brushing the card aside defers it — the phone's version of Space.
+ *
+ * Both directions do the same thing on purpose. The other half of the pair, open-and-record,
+ * leaves the app and retires the account for good, so it stays a deliberate tap: a gesture
+ * you can make by accident must never be the destructive one. Deferring costs nothing, which
+ * is exactly why it is the one worth making fast.
+ *
+ * Pointer events only, and only for touch and pen: a mouse already has two buttons in front
+ * of it, and dragging paper with a cursor is a different idiom.
+ */
+(() => {
+  const card = el('card');
+  if (!card || typeof card.setPointerCapture !== 'function') return;   // no pointer events here
+
+  let startX = 0, startY = 0, dx = 0, id = null, dragging = false;
+
+  // Far enough that it cannot be a tap that wandered, and short enough to flick.
+  // Proportional to the card so it means the same thing on a small phone and a tablet.
+  const commitDistance = () => Math.max(56, card.offsetWidth * 0.28);
+
+  const settle = (toX) => {
+    card.classList.remove('is-dragging');
+    card.classList.add('is-settling');
+    card.style.transform = toX ? `translateX(${toX}px) rotate(${toX / 60}deg)` : '';
+    card.style.opacity = toX ? '0' : '';
+  };
+
+  const clear = () => {
+    card.classList.remove('is-dragging', 'is-settling');
+    card.style.transform = '';
+    card.style.opacity = '';
+  };
+
+  card.addEventListener('pointerdown', (event) => {
+    if (event.pointerType === 'mouse' || busyCard || !current()) return;
+    // A drag that starts on a button is that button's press, not the card's.
+    if (event.target && event.target.closest && event.target.closest('button')) return;
+    id = event.pointerId;
+    startX = event.clientX; startY = event.clientY; dx = 0; dragging = false;
+    clear();
+  });
+
+  card.addEventListener('pointermove', (event) => {
+    if (id === null || event.pointerId !== id) return;
+    const moveX = event.clientX - startX;
+    const moveY = event.clientY - startY;
+    if (!dragging) {
+      // Until the direction is settled, let the browser have it. Claiming the pointer on the
+      // first pixel would fight the page's own scrolling on every vertical flick.
+      if (Math.abs(moveX) < 10 || Math.abs(moveX) <= Math.abs(moveY)) return;
+      dragging = true;
+      card.classList.add('is-dragging');
+      card.classList.remove('is-settling');
+      // Without capture the card stops hearing the finger the moment it leaves its edge, and
+      // a card mid-flick freezes halfway across the screen.
+      try { card.setPointerCapture(id); } catch { /* pointer already gone */ }
+    }
+    dx = moveX;
+    // The paper turns as it slides, so it reads as a sheet being pushed rather than a box
+    // sliding on rails. Divided, not multiplied: a few degrees across the whole travel.
+    card.style.transform = `translateX(${dx}px) rotate(${dx / 60}deg)`;
+    card.style.opacity = String(Math.max(0.35, 1 - Math.abs(dx) / (card.offsetWidth * 1.6)));
+  });
+
+  const end = (event) => {
+    if (id === null || (event && event.pointerId !== id)) return;
+    const pointer = id;
+    id = null;
+    try { card.releasePointerCapture(pointer); } catch { /* never captured */ }
+    if (!dragging) { clear(); return; }
+    dragging = false;
+
+    if (Math.abs(dx) >= commitDistance() && !busyCard) {
+      // Send it the way it was already going, then let the queue move under it. The card is
+      // reused for the next account, so the styles have to come off once it has landed.
+      settle(dx > 0 ? card.offsetWidth * 1.2 : card.offsetWidth * -1.2);
+      const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const done = () => { clear(); advance({ record: false }); learnSwipe(); };
+      if (reduce) done(); else setTimeout(done, 200);
+    } else {
+      settle(0);   // not far enough to mean anything: back to where it was
+      setTimeout(() => card.classList.remove('is-settling'), 240);
+    }
+    dx = 0;
+  };
+
+  card.addEventListener('pointerup', end);
+  card.addEventListener('pointercancel', end);
+})();
+
 el('batch-size').addEventListener('change', () => {
   try { localStorage.setItem('x_batch_size', el('batch-size').value); } catch { /* blocked */ }
   paintBatchLabels();
@@ -960,10 +1090,15 @@ el('welcome-help')?.addEventListener('click', () => {
 });
 
 el('forget').addEventListener('click', async () => {
+  // forgetAll, not forget. The key was renamed to match the data-t attribute in the
+  // markup and these two call sites were missed, so the dialog opened with the string
+  // "undefined" as both its title and its confirm button for as long as it has existed.
+  // Section [2] of tests/test_frontend.mjs now reads the t('...') calls out of this file
+  // as well as the data-t attributes, which is the only reason a JS-only key gets checked.
   const confirmed = await askConfirm({
-    title: t('forget'),
+    title: t('forgetAll'),
     body: t('confirmForget'),
-    action: t('forget'),
+    action: t('forgetAll'),
     danger: true,
   });
   if (!confirmed) return;

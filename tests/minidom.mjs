@@ -89,6 +89,19 @@ class Node {
   set colSpan(v) { this.attributes.colspan = String(v); }
   get offsetWidth() { return 100; }   // read only to force a style flush
 
+  // Pointer capture, kept real rather than stubbed: a drag that never takes capture stops
+  // hearing the pointer the moment the finger crosses the element's edge, so the test has to
+  // be able to see that it was taken. Real browsers throw for a pointer that is no longer
+  // active, and so does this.
+  setPointerCapture(pointerId) {
+    if (pointerId === undefined) throw new Error('setPointerCapture needs a pointerId');
+    this.capturedPointer = pointerId;
+  }
+  releasePointerCapture(pointerId) {
+    if (this.capturedPointer !== pointerId) throw new Error('NotFoundError: pointer not captured');
+    this.capturedPointer = null;
+  }
+
   get textContent() {
     if (this.children.length === 0) return this.text;
     return this.children.map((c) => c.textContent).join('');
@@ -102,6 +115,18 @@ class Node {
   // ---- selectors ----
   querySelectorAll(selector) { return matchAll(selector, this.descendants(), this); }
   querySelector(selector) { return this.querySelectorAll(selector)[0] || null; }
+  // Walks up from this node — used by the card gesture to tell a press that began on a button
+  // from one that began on the paper. A simple selector is all app.js passes, and all this
+  // matches.
+  closest(selector) {
+    const test = parseSimple(selector.trim());
+    let node = this;
+    while (node) {
+      if (node.tagName && matchesSimple(node, test)) return node;
+      node = node.parentNode;
+    }
+    return null;
+  }
 
   // ---- events ----
   addEventListener(type, fn) {
