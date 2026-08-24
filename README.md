@@ -58,13 +58,21 @@ python x_follow_analyzer.py
 
 نسخهٔ دسکتاپ یک دکمهٔ **خروجی اکسل** هم دارد که فهرست را با یوزرنیم، آیدی و لینک در یک فایل `.xlsx` می‌ریزد. تنها جایی از برنامه است که به `openpyxl` نیاز دارد، و اگر نصب نباشد برنامه crash نمی‌کند؛ همان دستور نصب را نشانت می‌دهد.
 
-**نسخهٔ اندروید** یک APK واقعی است که خودت یک‌بار می‌سازی. روی ویندوز یک دستور است:
+**نسخهٔ اندروید** یک APK واقعی است و آماده هم هست: از [آخرین Release](https://github.com/weederace/x-follow-analyzer/releases/latest) فایل `follow-desk-debug.apk` را بگیر و روی گوشی بازش کن. نه Node لازم دارد، نه JDK، نه هیچ چیز دیگری. اندروید می‌پرسد که آیا نصب از این منبع مجاز است — چون فایل با کلید debug امضا شده و از Play Store نمی‌آید؛ برای استفادهٔ شخصی مشکلی ندارد.
+
+اگر ترجیح می‌دهی خودت بسازی — یا چیزی در `web/` عوض کرده‌ای و APK تازه می‌خواهی — روی ویندوز یک دستور است:
 
 ```bat
 powershell -ExecutionPolicy Bypass -File build-apk.ps1
 ```
 
-خودش JDK را پیدا می‌کند، Android SDK را پیدا یا (با اجازه‌ات) نصب می‌کند، build می‌گیرد و فایل را در `dist\follow-desk-debug.apk` می‌گذارد. جزئیات و مسیر دستی در [ANDROID.md](ANDROID.md) است.
+خودش JDK را پیدا می‌کند، Android SDK را پیدا یا (با اجازه‌ات) نصب می‌کند، build می‌گیرد و فایل را در `dist\follow-desk-debug.apk` می‌گذارد. یک نکته که واقعاً پیش می‌آید: Gradle 8.2.1 فقط با JDK ۱۷ تا ۲۰ می‌سازد، پس اگر جاوای جدیدتری داری اسکریپت همان اول می‌ایستد و می‌گوید. یکی نصب کن و دوباره بزن:
+
+```powershell
+winget install EclipseAdoptium.Temurin.17.JDK
+```
+
+لازم نیست `JAVA_HOME` را عوض کنی؛ اسکریپت خودش می‌گردد و نسخهٔ مناسب را برمی‌دارد، پس جاوای پیش‌فرض سیستم و بقیهٔ پروژه‌هایت دست‌نخورده می‌مانند. جزئیات و مسیر دستی در [ANDROID.md](ANDROID.md) است.
 
 ---
 
@@ -184,7 +192,9 @@ python x_follow_analyzer.py       # desktop: nothing but Python (openpyxl if you
 python tests/run_all.py           # all six suites, over 440 checks
 ```
 
-On Windows, `Run.bat` offers all four of these as a menu, the last being `powershell -ExecutionPolicy Bypass -File build-apk.ps1`, which takes a fresh clone all the way to `dist\follow-desk-debug.apk` — finding a JDK, finding or installing the Android SDK, and writing the `local.properties` Gradle wants. [ANDROID.md](ANDROID.md) covers the manual route and every error either path can produce. The desktop version also exports the list to `.xlsx`; that button is the only thing in the project that wants `openpyxl`, and it tells you the install command rather than crashing if it is missing.
+The Android app does not have to be built. The APK is attached to the [latest release](https://github.com/weederace/x-follow-analyzer/releases/latest) and needs neither Node nor a JDK — only Android's permission to install a file signed with a debug key rather than one from the Play Store. Building it yourself is for when you have changed something under `web/`.
+
+On Windows, `Run.bat` offers all four of these as a menu, the last being `powershell -ExecutionPolicy Bypass -File build-apk.ps1`, which takes a fresh clone all the way to `dist\follow-desk-debug.apk` — finding a JDK, finding or installing the Android SDK, and writing the `local.properties` Gradle wants. Gradle 8.2.1 builds only with JDK 17 to 20, so on a machine with a newer Java the script stops before the download and names the fix (`winget install EclipseAdoptium.Temurin.17.JDK`) rather than failing four minutes in with `Unsupported class file major version`. [ANDROID.md](ANDROID.md) covers the manual route and every error either path can produce. The desktop version also exports the list to `.xlsx`; that button is the only thing in the project that wants `openpyxl`, and it tells you the install command rather than crashing if it is missing.
 
 Both ways of getting it wrong are answered in words rather than in a stack trace. Run the web version before installing its packages and it names the missing one and prints the command that fixes it, then points at the desktop version, which needs nothing but Python. Run `Run.bat` on a computer with no Python at all and it says so, and where to get it, instead of flashing `'python' is not recognized` and closing.
 

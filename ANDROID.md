@@ -351,16 +351,23 @@ cd C:\Android\Sdk\cmdline-tools\latest\bin
 
 ### `Unsupported class file major version` یا خطای Kotlin/Gradle
 
-یعنی JDK شما بیرون از بازهٔ ۱۷ تا ۲۰ است — معمولاً جدیدتر. یک JDK 17 نصب کنید
-(<https://adoptium.net>) و همان را به Gradle نشان دهید:
+یعنی JDK شما بیرون از بازهٔ ۱۷ تا ۲۰ است — معمولاً جدیدتر. یکی داخل بازه نصب کنید:
 
 ```powershell
-[Environment]::SetEnvironmentVariable('JAVA_HOME', 'C:\Program Files\Java\jdk-17', 'User')
+winget install EclipseAdoptium.Temurin.17.JDK
 ```
+
+(یا دستی از <https://adoptium.net>، نسخهٔ Temurin 17 LTS.) بعد دوباره `build-apk.ps1`
+را بزنید و **`JAVA_HOME` را دست نزنید**: اسکریپت خودش `Program Files` را می‌گردد،
+اولین JDK داخل بازه را برمی‌دارد و `JAVA_HOME` را فقط داخل پروسهٔ خودش ست می‌کند.
+پس جاوای پیش‌فرض سیستم — و هر پروژهٔ جاوای دیگری که دارید — دست‌نخورده می‌ماند.
+عوض کردن دائمی `JAVA_HOME` برای این یک build لازم نیست و می‌تواند جای دیگری را
+خراب کند.
 
 `build-apk.ps1` این را قبل از شروع build بررسی می‌کند و اگر JDK مناسبی پیدا نکند
 همان اول می‌گوید، نه بعد از چند دقیقه دانلود Gradle. اگر JDK درست دارید ولی جای
-غیرمعمولی است، `-JavaHome` را به آن بدهید.
+غیرمعمولی است، `-JavaHome` را به آن بدهید — و مسیر واقعی بدهید، چون پیام
+`is not a JDK` همان چیزی است که وقتی آن پوشه اصلاً وجود ندارد هم می‌بینید.
 
 ### اولین build کند است
 
