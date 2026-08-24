@@ -14,11 +14,22 @@ __pycache__/
 # android/ that is ours rather than Capacitor's, and they have to survive regeneration.
 node_modules/
 android/
-dist/
+dist/*
 *.apk
 *.aab
 *.keystore
 *.jks
+
+# ...with exactly one exception. The released APK is committed so that "Download ZIP" on
+# GitHub carries the Android app too, not only the source: most people who want the phone
+# app will never look at the Releases page. Note `dist/*` rather than `dist/` above —
+# git cannot re-include a file whose parent directory is itself excluded, so the directory
+# has to stay visible for this line to have any effect.
+#
+# Update it only when cutting a release, never on every build: each new copy is another
+# ~4 MB in history that no later commit can remove. tests/test_android.py compares the
+# web assets inside it against web/, so a stale one fails the suite instead of shipping.
+!dist/follow-desk-debug.apk
 
 # Signing secrets must never be committed: a leaked upload key lets someone else
 # publish an update in your name.

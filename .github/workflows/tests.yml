@@ -1,0 +1,40 @@
+# The six suites, on every push. Node is installed here on purpose: run_all.py degrades to
+# the four Python suites without it and says so rather than reporting success for a job
+# half done, which is right on a stranger's machine and wrong on CI.
+#
+# The suite that matters most to this workflow is test_android.py, which compares the web
+# assets inside the committed dist/follow-desk-debug.apk against web/. That is what stops
+# a change to web/app.js from quietly leaving an old APK in the repo for whoever clicks
+# "Download ZIP".
+name: Tests
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  suites:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # No pip install: every suite runs on the standard library. test_server.py stubs
+      # fastapi and uvicorn into sys.modules precisely so that a checkout with nothing
+      # installed still tests the server, and installing them here would hide a regression
+      # in that stub from everyone who has not installed them either.
+      - name: All six suites
+        run: python tests/run_all.py

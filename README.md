@@ -58,7 +58,12 @@ python x_follow_analyzer.py
 
 نسخهٔ دسکتاپ یک دکمهٔ **خروجی اکسل** هم دارد که فهرست را با یوزرنیم، آیدی و لینک در یک فایل `.xlsx` می‌ریزد. تنها جایی از برنامه است که به `openpyxl` نیاز دارد، و اگر نصب نباشد برنامه crash نمی‌کند؛ همان دستور نصب را نشانت می‌دهد.
 
-**نسخهٔ اندروید** یک APK واقعی است و آماده هم هست: از [آخرین Release](https://github.com/weederace/x-follow-analyzer/releases/latest) فایل `follow-desk-debug.apk` را بگیر و روی گوشی بازش کن. نه Node لازم دارد، نه JDK، نه هیچ چیز دیگری. اندروید می‌پرسد که آیا نصب از این منبع مجاز است — چون فایل با کلید debug امضا شده و از Play Store نمی‌آید؛ برای استفادهٔ شخصی مشکلی ندارد.
+**نسخهٔ اندروید** یک APK واقعی است و لازم نیست بسازی‌اش. دو راه برای گرفتنش هست و هر دو یک فایل می‌دهند:
+
+- **[دانلود مستقیم APK](https://github.com/weederace/x-follow-analyzer/releases/latest/download/follow-desk-debug.apk)** — این لینک همیشه به آخرین نسخه اشاره می‌کند، پس می‌توانی همین را در گوشی باز کنی و تمام.
+- یا اگر کل پروژه را با **Code → Download ZIP** گرفته‌ای، فایل همان‌جا در `dist/follow-desk-debug.apk` هست. برای همین APK داخل مخزن نگه داشته می‌شود: کسی که فقط اپ گوشی را می‌خواهد نباید مجبور شود صفحهٔ Releases را پیدا کند.
+
+نه Node لازم دارد، نه JDK، نه هیچ چیز دیگری. اندروید می‌پرسد که آیا نصب از این منبع مجاز است — چون فایل با کلید debug امضا شده و از Play Store نمی‌آید؛ برای استفادهٔ شخصی مشکلی ندارد.
 
 اگر ترجیح می‌دهی خودت بسازی — یا چیزی در `web/` عوض کرده‌ای و APK تازه می‌خواهی — روی ویندوز یک دستور است:
 
@@ -143,6 +148,8 @@ web/icon.svg            آیکون برنامه و اپ اندروید
 web/manifest.webmanifest  تا نصب روی گوشی و دسکتاپ ممکن باشد
 
 build-apk.ps1           از clone تا APK نصب‌شدنی، با یک دستور
+dist/follow-desk-debug.apk  اپ اندروید، آماده برای نصب — تنها فایل باینری مخزن
+.github/workflows/      ساخت خودکار APK با هر تگ، و اجرای تست‌ها با هر push
 android-res/            آیکون لانچر، صفحهٔ شروع و استایل شب — تنها چیزی در android/ که مال ماست
 tools/                  ساخت آیکون‌ها از icon.svg و کپی‌شان در پروژهٔ تولیدشده
 package.json            اسکریپت‌های ساخت APK و اجرای تست‌های جاوااسکریپت
@@ -158,6 +165,13 @@ tests/run_all.py        همهٔ تست‌ها با یک دستور
 آیکون‌ها باید دوباره سر جایشان بروند، و اگر پیگیری نشوند کسی که پروژه را clone
 می‌کند اپ را با لوگوی پیش‌فرض Capacitor می‌سازد.
 
+خودِ APK هم استثناست: `*.apk` نادیده گرفته می‌شود و فقط همین یک فایل نه، تا
+**Code → Download ZIP** اپ گوشی را هم با خودش ببرد. عوضش خطر کهنه شدن دارد، پس
+`tests/test_android.py` بازش می‌کند و فایل‌های `web/` داخلش را با `web/` واقعی
+می‌سنجد؛ اگر رابط عوض شده باشد و APK نه، تست سرخ می‌شود. ساختن نسخهٔ تازه هم دیگر
+دست یک کامپیوتر خاص نیست: هر تگ `v*` روی گیت‌هاب build می‌شود و APK به همان Release
+می‌چسبد.
+
 هیچ CDN، هیچ فریم‌ورک، هیچ مرحلهٔ build. `web/` همان چیزی است که مرورگر می‌بیند، پس چیزی نیست که از کد اصلی عقب بماند.
 
 ---
@@ -168,7 +182,7 @@ tests/run_all.py        همهٔ تست‌ها با یک دستور
 python tests/run_all.py
 ```
 
-شش مجموعه، بیش از ۴۴۰ بررسی. مهم‌ترینشان `test_analyzer.mjs` است: یک آرشیو می‌سازد و همان بایت‌ها را به هر دو خوانندهٔ پایتونی و جاوااسکریپتی می‌دهد و خروجی‌ها را مقایسه می‌کند، چون دو پیاده‌سازی از یک الگوریتم بی‌صدا از هم دور می‌شوند.
+شش مجموعه، بیش از ۴۷۰ بررسی. مهم‌ترینشان `test_analyzer.mjs` است: یک آرشیو می‌سازد و همان بایت‌ها را به هر دو خوانندهٔ پایتونی و جاوااسکریپتی می‌دهد و خروجی‌ها را مقایسه می‌کند، چون دو پیاده‌سازی از یک الگوریتم بی‌صدا از هم دور می‌شوند.
 
 نسخهٔ دسکتاپ با یک tkinter تقلبی (`tests/faketk.py`) و نسخهٔ وب با یک DOM تقلبی (`tests/minidom.mjs`) اجرا می‌شوند — هیچ‌کدام Mock نیستند، بلکه پیاده‌سازی واقعی همان بخش کوچکی هستند که برنامه استفاده می‌کند. تفاوتش این است که Mock به هر اسم غلطی جواب می‌دهد، اینها نه. تست‌ها هرگز به تاریخچهٔ واقعی دست نمی‌زنند؛ `tests/sandbox.py` مسیر ذخیره‌سازی را به یک پوشهٔ موقت می‌برد.
 
@@ -189,10 +203,12 @@ Request your archive from X (`Settings and privacy` → `Your account` → `Down
 pip install -r requirements.txt   # fastapi + uvicorn, needed by the web version
 python x_analyzer_server.py       # web:     http://127.0.0.1:8000
 python x_follow_analyzer.py       # desktop: nothing but Python (openpyxl if you export)
-python tests/run_all.py           # all six suites, over 440 checks
+python tests/run_all.py           # all six suites, over 470 checks
 ```
 
-The Android app does not have to be built. The APK is attached to the [latest release](https://github.com/weederace/x-follow-analyzer/releases/latest) and needs neither Node nor a JDK — only Android's permission to install a file signed with a debug key rather than one from the Play Store. Building it yourself is for when you have changed something under `web/`.
+The Android app does not have to be built, and you do not have to find the Releases page either. [Download the APK directly](https://github.com/weederace/x-follow-analyzer/releases/latest/download/follow-desk-debug.apk) — that link always resolves to the newest release — or, if you took the whole project with **Code → Download ZIP**, the same file is already sitting at `dist/follow-desk-debug.apk`. It is the one binary this repository keeps on purpose: somebody who only wants the phone app should not have to build it or hunt for it. Neither Node nor a JDK is involved, only Android's permission to install a file signed with a debug key rather than one from the Play Store. Building it yourself is for when you have changed something under `web/`.
+
+Every tagged release is built by GitHub rather than on one particular laptop — `.github/workflows/apk.yml` generates the Android project, lays `android-res/` back over Capacitor's template, builds with JDK 17 and attaches the APK under that same fixed name. The copy committed here is a snapshot of the last release, so `tests/test_android.py` unzips it and compares its bundled web assets against `web/`: change the front end without rebuilding and the suite goes red, rather than a stale app shipping to whoever downloads the ZIP.
 
 On Windows, `Run.bat` offers all four of these as a menu, the last being `powershell -ExecutionPolicy Bypass -File build-apk.ps1`, which takes a fresh clone all the way to `dist\follow-desk-debug.apk` — finding a JDK, finding or installing the Android SDK, and writing the `local.properties` Gradle wants. Gradle 8.2.1 builds only with JDK 17 to 20, so on a machine with a newer Java the script stops before the download and names the fix (`winget install EclipseAdoptium.Temurin.17.JDK`) rather than failing four minutes in with `Unsupported class file major version`. [ANDROID.md](ANDROID.md) covers the manual route and every error either path can produce. The desktop version also exports the list to `.xlsx`; that button is the only thing in the project that wants `openpyxl`, and it tells you the install command rather than crashing if it is missing.
 

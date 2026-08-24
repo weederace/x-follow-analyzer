@@ -23,11 +23,17 @@ import subprocess
 import sys
 import tempfile
 import xml.etree.ElementTree as ET
+import zipfile
 import zlib
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 RES = ROOT / "android-res"
+
+# One name, in one place. It is the Gradle output's published filename, the entry re-included
+# in .gitignore, and the tail of the permanent /releases/latest/download/ URL in README, and
+# section [14] checks that all of them still agree.
+APK_NAME = "follow-desk-debug.apk"
 
 ok = fail = 0
 
@@ -285,9 +291,28 @@ print("\n[6] git keeps the icons and throws away the build")
 gitignore = (ROOT / ".gitignore").read_text(encoding="utf-8").splitlines()
 rules = [line.strip() for line in gitignore if line.strip() and not line.startswith("#")]
 check("android/ is ignored", "android/" in rules)
-check("dist/ is ignored", "dist/" in rules)
+check("dist/ contents are ignored", "dist/*" in rules)
 check("built APKs are ignored", "*.apk" in rules)
 check("signing secrets are ignored", "keystore.properties" in rules and "*.jks" in rules)
+# Reading the rules as text is not enough here, because the released APK is deliberately
+# re-included and the interaction is subtle: `dist/*` rather than `dist/` above, because git
+# cannot re-include a file whose parent directory is excluded, and the `!` line last, because
+# the last matching pattern wins. Ask git itself instead. Note the absence of -v: with -v,
+# check-ignore exits 0 whenever *any* pattern matched, negation included, so the verbose form
+# would report the committed APK as ignored and this check could never fail.
+def ignored_by_git(relative: str) -> bool:
+    return subprocess.run(["git", "check-ignore", "-q", relative],
+                          cwd=str(ROOT)).returncode == 0
+
+
+if (ROOT / ".git").exists():
+    check("the released APK escapes those rules, so a clone carries it",
+          not ignored_by_git("dist/follow-desk-debug.apk"))
+    check("every other build output in dist/ is still ignored",
+          ignored_by_git("dist/app-debug.apk") and ignored_by_git("dist/output-metadata.json"))
+    check("an APK anywhere else is still ignored", ignored_by_git("follow-desk-debug.apk"))
+else:
+    print("  (no .git here, so the check-ignore checks are skipped)")
 # The trap: ignoring android/ is right, and ignoring android-res/ would silently undo
 # this whole suite for anyone who cloned the repo.
 check("android-res/ is NOT ignored",
@@ -500,6 +525,107 @@ apk_branch = menu.find('if "%choice%"=="4" goto apk')
 python_test = menu.find("-c \"import sys\"")
 check("the APK build branches away before Python is required",
       apk_branch != -1 and python_test != -1 and apk_branch < python_test)
+
+print("\n[13] The APK committed for people who download the ZIP")
+# This is the only binary the repository keeps, and it is kept for one reason: "Code ->
+# Download ZIP" does not include release assets, so without it somebody who took the whole
+# project still has no phone app. The risk that buys is staleness -- an APK is a snapshot of
+# web/ at build time, and nothing about editing web/app.js makes the old one look wrong. So
+# the file is unzipped here and measured against the front end it claims to contain.
+APK = ROOT / "dist" / APK_NAME
+check(f"dist/{APK_NAME} is in the tree", APK.is_file())
+
+if APK.is_file():
+    check("it is a real zip archive, not a truncated download",
+          zipfile.is_zipfile(APK))
+    with zipfile.ZipFile(APK) as apk:
+        check("no entry inside it is corrupt", apk.testzip() is None)
+        entries = set(apk.namelist())
+        check("it is an Android package: manifest, bytecode and resource table",
+              "AndroidManifest.xml" in entries and "classes.dex" in entries
+              and "resources.arsc" in entries)
+        check("it is debug-signed, so a phone will install it",
+              any(name.startswith("META-INF/") and name.endswith((".RSA", ".DSA", ".EC"))
+                  for name in entries))
+
+        # The staleness guard. Capacitor copies webDir verbatim into assets/public with no
+        # minifying step, so these are byte comparisons rather than size ones -- a one-word
+        # change to a Persian string moves no byte count but does change the digest.
+        drifted, absent = [], []
+        for source in sorted(p for p in (ROOT / "web").iterdir() if p.is_file()):
+            packed = f"assets/public/{source.name}"
+            if packed not in entries:
+                absent.append(source.name)
+            elif apk.read(packed) != source.read_bytes():
+                drifted.append(source.name)
+        check(f"every one of the {len(list((ROOT / 'web').iterdir()))} files in web/ is inside it",
+              not absent)
+        if absent:
+            print(f"        packaged from an older web/, missing: {', '.join(absent)}")
+        check("and each is byte-identical, so the APK is not stale",
+              not drifted)
+        if drifted:
+            print(f"        web/ has moved on since this APK was built: {', '.join(drifted)}")
+            print("        rebuild it: powershell -ExecutionPolicy Bypass -File build-apk.ps1")
+
+print("\n[14] The workflows that build it, and the link that has to keep resolving")
+# .github/ is not covered by any other suite, and a broken workflow is invisible until a
+# release goes out with no APK attached to it.
+WORKFLOWS = ROOT / ".github" / "workflows"
+apk_yml = WORKFLOWS / "apk.yml"
+tests_yml = WORKFLOWS / "tests.yml"
+check("the APK workflow exists", apk_yml.is_file())
+check("the test workflow exists", tests_yml.is_file())
+
+if apk_yml.is_file() and tests_yml.is_file():
+    for path in (apk_yml, tests_yml):
+        raw = path.read_bytes()
+        # YAML forbids a tab as indentation outright, and an editor that expands nothing is
+        # the usual way one arrives. GitHub rejects the whole file, so the workflow simply
+        # never runs -- there is no failing build to notice.
+        check(f"{path.name} indents with spaces, never a tab", b"\t" not in raw)
+        ascii_only = all(byte < 127 for byte in raw)
+        check(f"{path.name} is pure ASCII, like every other script here", ascii_only)
+        # decode("ascii") on a file that just failed that check raises, which would end the
+        # suite here and hide checks [14] onwards behind a traceback. errors="replace" keeps
+        # the one failure reported as a failure.
+        text = raw.decode("ascii", errors="replace")
+        roots = [line.split(":")[0] for line in text.splitlines()
+                 if line and not line.startswith((" ", "#")) and ":" in line]
+        check(f"{path.name} declares a trigger and a job at the top level",
+              "on" in roots and "jobs" in roots and "name" in roots)
+
+    apk_text = apk_yml.read_text(encoding="ascii", errors="replace")
+
+    # The reason this check is here rather than in a comment: Gradle 8.2.1, which Capacitor 6
+    # pins, knows Java only up to 20. Bumping this to 21 to be current is a natural thing to
+    # do and it breaks the build minutes in, with a class-file version number for an error.
+    java = re.search(r"java-version:\s*'?(\d+)'?", apk_text)
+    check("it asks for a JDK at all", java is not None)
+    check("and that JDK is 17-20, the only range Gradle 8.2.1 accepts",
+          java is not None and 17 <= int(java.group(1)) <= 20)
+
+    check("it builds on a tag, which is what makes a release produce an APK",
+          re.search(r"tags:\s*\[\s*'v\*'\s*\]", apk_text) is not None)
+    # Same trap as check [5], one layer out: cap add writes Capacitor's template logo, and
+    # only the copier puts ours back. A workflow that calls gradlew directly would publish
+    # an APK with a stranger's icon and no error anywhere.
+    check("it runs android:init, so the launcher icons cannot be skipped",
+          "npm run android:init" in apk_text)
+    check("it grants itself no more than the write it needs to attach the file",
+          "contents: write" in apk_text and "packages:" not in apk_text)
+
+    # The invariant that ties this section to the README. The permanent download URL is
+    # /releases/latest/download/<asset name>, which resolves only if every release spells the
+    # asset exactly that way -- and if it stops resolving, the page still looks fine and the
+    # link 404s. Three places, one name.
+    check(f"the workflow publishes it as {APK_NAME}", APK_NAME in apk_text)
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    permalink = f"/releases/latest/download/{APK_NAME}"
+    check("README's direct download link uses that same name",
+          permalink in readme)
+    check("and points at this repository, not a fork or a placeholder",
+          f"github.com/weederace/x-follow-analyzer{permalink}" in readme)
 
 print(f"\n{'=' * 52}\n  {ok} passed, {fail} failed\n{'=' * 52}")
 sys.exit(1 if fail else 0)
