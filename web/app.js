@@ -319,6 +319,9 @@ function setTheme(mode) {
 }
 
 function say(key) {
+  // In the Android build, server-related warnings are noise: there is no server and
+  // there never will be one, so telling the person it is offline teaches nothing.
+  if (NATIVE && key === 'historyOffline') return;
   el('notice-text').textContent = t(key);
   el('notice').hidden = false;
 }
@@ -748,9 +751,11 @@ function dismissWelcome() {
 function probeBrowser() {
   const state = { popups: true, storage: true };
   if (!NATIVE) {
-    const win = window.open('', '_blank');
-    state.popups = Boolean(win);
-    if (win && typeof win.close === 'function') win.close();
+    try {
+      const win = window.open('', '_blank');
+      state.popups = Boolean(win);
+      if (win && typeof win.close === 'function') win.close();
+    } catch { state.popups = false; }
   }
   try {
     const key = 'x_probe_' + Date.now();

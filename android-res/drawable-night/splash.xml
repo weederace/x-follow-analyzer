@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Night splash: the dark desk colour from web/app.css with the launcher mark centred. -->
+<!-- Night splash: the dark M3 desk colour from web/app.css with the launcher mark centred. -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item><color android:color="#171D1B"/></item>
+    <item><color android:color="#111413"/></item>
     <item>
         <bitmap android:src="@mipmap/ic_launcher_foreground"
                 android:gravity="center"/>

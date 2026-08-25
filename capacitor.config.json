@@ -6,10 +6,7 @@
   "//": [
     "webDir points straight at web/ — the same files the Python server hands the",
     "browser. There is no build step to get out of sync with, and no bundler, so what",
-    "you test on the desktop is byte-for-byte what ships in the APK.",
-    "",
-    "The app is fully offline on Android: analyzer.js reads the ZIP in the WebView and",
-    "history.js falls back to device storage when no local server answers."
+    "you test on the desktop is byte-for-byte what ships in the APK."
   ],
 
   "server": {
@@ -20,7 +17,7 @@
     "//": "No cleartext HTTP anywhere: the app never makes a network request of its own.",
     "allowMixedContent": false,
     "webContentsDebuggingEnabled": false,
-    "backgroundColor": "#BAC5BFFF"
+    "backgroundColor": "#F2F4F3FF"
   },
 
   "plugins": {

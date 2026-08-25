@@ -8,7 +8,7 @@
      tools/apply-android-res.mjs deletes those PNGs, because a bitmap variant of the
      same resource name would win on whichever density it matched. -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item><color android:color="#BAC5BF"/></item>
+    <item><color android:color="#F2F4F3"/></item>
     <item>
         <bitmap android:src="@mipmap/ic_launcher_foreground"
                 android:gravity="center"/>

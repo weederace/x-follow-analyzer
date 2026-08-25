@@ -37,11 +37,11 @@ VIEW = 64
 SS = 20                     # master is drawn at 64*SS and downsampled from there
 
 # Straight out of web/app.css, so the icon cannot drift from the interface's palette.
-DESK = (0xBA, 0xC5, 0xBF)   # --desk   the desk surface, and the adaptive-icon background
-CARD = (0xFC, 0xFB, 0xF7)   # --card   bond paper
-INK = (0x17, 0x1C, 0x1A)    # --ink
-PINE = (0x1F, 0x4E, 0x46)   # --pine
-STAMP = (0x9E, 0x33, 0x24)  # --stamp  the only saturated colour in the whole app
+DESK = (0xF2, 0xF4, 0xF3)   # --desk   the desk surface, and the adaptive-icon background
+CARD = (0xFF, 0xFF, 0xFF)    # --card   white cards (M3)
+INK = (0x1A, 0x1C, 0x1E)    # --ink
+PINE = (0x00, 0x6B, 0x5A)   # --pine
+STAMP = (0xBA, 0x1A, 0x1A)  # --stamp  the only saturated colour in the whole app
 
 CARD_BOX = (13, 14, 51, 54)         # x13 y14 w38 h40
 CARD_R = 2
