@@ -495,8 +495,18 @@ function advance({ record }) {
  * build wrapped these in setTimeout, which is why the batch button opened nothing.
  */
 function openAndRecord(person) {
-  const win = window.open(person.url, '_blank', 'noopener');
-  if (!win) { say(NATIVE ? 'popupBlockedNative' : 'popupBlocked'); return false; }
+  // Some Chromium builds return null for window.open(..., 'noopener') even though the
+  // tab opened successfully. Opening without the flag and clearing .opener manually
+  // achieves the same security goal while giving us the handle we need to tell whether
+  // the tab actually appeared.
+  let win;
+  try { win = window.open(person.url, '_blank'); } catch { win = null; }
+  if (win) {
+    try { win.opener = null; } catch { /* cross-origin: already safe */ }
+  } else {
+    say(NATIVE ? 'popupBlockedNative' : 'popupBlocked');
+    return false;
+  }
   hush();
   record([person.account_id]);
   return true;
@@ -691,9 +701,12 @@ function openBatch() {
   const opened = [];
   let blocked = false;
   for (const person of batch) {
-    const win = window.open(person.url, '_blank', 'noopener');
-    if (win) opened.push(person.account_id);
-    else { blocked = true; break; }   // once the blocker trips, the rest will fail too
+    let win;
+    try { win = window.open(person.url, '_blank'); } catch { win = null; }
+    if (win) {
+      try { win.opener = null; } catch { /* cross-origin */ }
+      opened.push(person.account_id);
+    } else { blocked = true; break; }   // once the blocker trips, the rest will fail too
   }
 
   if (blocked) say(NATIVE ? 'popupBlockedNative' : 'popupBlocked'); else hush();
